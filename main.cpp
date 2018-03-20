@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
     font.setPointSize(14);
     a.setFont(font);
 
-
+//this is for github test
 
 //    w.setGeometry(QRect(30, 30, 720, 450));
     w.setWindowFlags(Qt::FramelessWindowHint);
