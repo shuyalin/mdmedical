@@ -14,9 +14,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mdmedical.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    serial.cpp
 
 HEADERS  += mdmedical.h \
-    qcustomplot.h
+    qcustomplot.h \
+    serial.h
 
 FORMS    += mdmedical.ui

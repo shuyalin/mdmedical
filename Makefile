@@ -50,11 +50,13 @@ OBJECTS_DIR   = ./
 
 SOURCES       = main.cpp \
 		mdmedical.cpp \
-		qcustomplot.cpp moc_mdmedical.cpp \
+		qcustomplot.cpp \
+		serial.cpp moc_mdmedical.cpp \
 		moc_qcustomplot.cpp
 OBJECTS       = main.o \
 		mdmedical.o \
 		qcustomplot.o \
+		serial.o \
 		moc_mdmedical.o \
 		moc_qcustomplot.o
 DIST          = ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/spec_pre.prf \
@@ -139,6 +141,7 @@ DIST          = ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mksp
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/qt_config.prf \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/devices/linux-buildroot-g++/qmake.conf \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/exclusive_builds.prf \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/toolchain.prf \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/default_pre.prf \
@@ -157,9 +160,11 @@ DIST          = ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mksp
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/yacc.prf \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/lex.prf \
 		mdmedical.pro mdmedical.h \
-		qcustomplot.h main.cpp \
+		qcustomplot.h \
+		serial.h main.cpp \
 		mdmedical.cpp \
-		qcustomplot.cpp
+		qcustomplot.cpp \
+		serial.cpp
 QMAKE_TARGET  = mdmedical
 DESTDIR       = 
 TARGET        = mdmedical
@@ -253,6 +258,7 @@ Makefile: mdmedical.pro ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/qt_config.prf \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/devices/linux-buildroot-g++/qmake.conf \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/exclusive_builds.prf \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/toolchain.prf \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/default_pre.prf \
@@ -358,6 +364,7 @@ Makefile: mdmedical.pro ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/
 ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/qt_config.prf:
 ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/devices/linux-buildroot-g++/qmake.conf:
 ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/spec_post.prf:
+.qmake.stash:
 ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/exclusive_builds.prf:
 ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/toolchain.prf:
 ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/default_pre.prf:
@@ -395,8 +402,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents mdmedical.h qcustomplot.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mdmedical.cpp qcustomplot.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mdmedical.h qcustomplot.h serial.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mdmedical.cpp qcustomplot.cpp serial.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents mdmedical.ui $(DISTDIR)/
 
 
@@ -546,6 +553,22 @@ moc_mdmedical.cpp: ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/a
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QMessageBox \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qmessagebox.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qdialog.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QComboBox \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcombobox.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyleoption.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractspinbox.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvalidator.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qregularexpression.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qicon.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qslider.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractslider.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyle.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabbar.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabwidget.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
 		qcustomplot.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QObject \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QPointer \
@@ -584,7 +607,6 @@ moc_mdmedical.cpp: ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/a
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractanimation.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstracteventdispatcher.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qeventloop.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractnativeeventfilter.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractproxymodel.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractstate.h \
@@ -649,7 +671,6 @@ moc_mdmedical.cpp: ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/a
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvariantanimation.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qqueue.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qreadwritelock.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qregularexpression.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qresource.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsavefile.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qscopedvaluerollback.h \
@@ -703,7 +724,6 @@ moc_mdmedical.cpp: ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/a
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QRect \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qsurface.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qsurfaceformat.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qicon.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qbitmap.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qclipboard.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qdesktopservices.h \
@@ -774,21 +794,10 @@ moc_mdmedical.cpp: ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/a
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextdocumentwriter.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextlist.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtexttable.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvalidator.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtguiversion.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QtWidgets \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QtWidgetsDepends \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractbutton.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemdelegate.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyleoption.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractspinbox.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qslider.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractslider.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyle.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabbar.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabwidget.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemview.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractscrollarea.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qaccessiblewidget.h \
@@ -806,7 +815,6 @@ moc_mdmedical.cpp: ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/a
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcolordialog.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcolormap.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcolumnview.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcombobox.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcommandlinkbutton.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qpushbutton.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcommonstyle.h \
@@ -916,6 +924,7 @@ moc_mdmedical.cpp: ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/a
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qprintpreviewdialog.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qprintpreviewwidget.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qtprintsupportversion.h \
+		serial.h \
 		mdmedical.h \
 		moc_predefs.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/moc
@@ -1538,6 +1547,22 @@ main.o: main.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QMessageBox \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qmessagebox.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qdialog.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QComboBox \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcombobox.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyleoption.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractspinbox.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvalidator.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qregularexpression.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qicon.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qslider.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractslider.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyle.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabbar.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabwidget.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
 		qcustomplot.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QObject \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QPointer \
@@ -1576,7 +1601,6 @@ main.o: main.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractanimation.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstracteventdispatcher.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qeventloop.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractnativeeventfilter.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractproxymodel.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractstate.h \
@@ -1641,7 +1665,6 @@ main.o: main.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvariantanimation.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qqueue.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qreadwritelock.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qregularexpression.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qresource.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsavefile.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qscopedvaluerollback.h \
@@ -1695,7 +1718,6 @@ main.o: main.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QRect \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qsurface.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qsurfaceformat.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qicon.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qbitmap.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qclipboard.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qdesktopservices.h \
@@ -1766,21 +1788,10 @@ main.o: main.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextdocumentwriter.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextlist.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtexttable.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvalidator.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtguiversion.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QtWidgets \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QtWidgetsDepends \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractbutton.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemdelegate.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyleoption.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractspinbox.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qslider.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractslider.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyle.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabbar.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabwidget.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemview.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractscrollarea.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qaccessiblewidget.h \
@@ -1798,7 +1809,6 @@ main.o: main.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcolordialog.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcolormap.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcolumnview.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcombobox.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcommandlinkbutton.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qpushbutton.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcommonstyle.h \
@@ -1908,6 +1918,7 @@ main.o: main.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qprintpreviewdialog.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qprintpreviewwidget.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qtprintsupportversion.h \
+		serial.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QApplication
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
@@ -2026,6 +2037,22 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QMessageBox \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qmessagebox.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qdialog.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QComboBox \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcombobox.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyleoption.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractspinbox.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvalidator.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qregularexpression.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qicon.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qslider.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractslider.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyle.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabbar.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabwidget.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
 		qcustomplot.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QObject \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QPointer \
@@ -2064,7 +2091,6 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractanimation.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstracteventdispatcher.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qeventloop.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractnativeeventfilter.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractproxymodel.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractstate.h \
@@ -2129,7 +2155,6 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvariantanimation.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qqueue.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qreadwritelock.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qregularexpression.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qresource.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsavefile.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qscopedvaluerollback.h \
@@ -2183,7 +2208,6 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QRect \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qsurface.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qsurfaceformat.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qicon.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qbitmap.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qclipboard.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qdesktopservices.h \
@@ -2254,21 +2278,10 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextdocumentwriter.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextlist.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtexttable.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvalidator.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtguiversion.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QtWidgets \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QtWidgetsDepends \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractbutton.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemdelegate.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyleoption.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractspinbox.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qslider.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractslider.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyle.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabbar.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabwidget.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemview.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractscrollarea.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qaccessiblewidget.h \
@@ -2286,7 +2299,6 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcolordialog.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcolormap.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcolumnview.h \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcombobox.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcommandlinkbutton.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qpushbutton.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcommonstyle.h \
@@ -2396,7 +2408,15 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qprintpreviewdialog.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qprintpreviewwidget.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qtprintsupportversion.h \
-		ui_mdmedical.h
+		serial.h \
+		ui_mdmedical.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QAction \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QApplication \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QButtonGroup \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QHeaderView \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QPushButton \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QSpinBox
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mdmedical.o mdmedical.cpp
 
 qcustomplot.o: qcustomplot.cpp qcustomplot.h \
@@ -2879,6 +2899,9 @@ qcustomplot.o: qcustomplot.cpp qcustomplot.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qprintpreviewwidget.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport/qtprintsupportversion.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o qcustomplot.o qcustomplot.cpp
+
+serial.o: serial.cpp serial.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o serial.o serial.cpp
 
 moc_mdmedical.o: moc_mdmedical.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mdmedical.o moc_mdmedical.cpp

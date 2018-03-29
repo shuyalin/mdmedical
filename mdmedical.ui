@@ -364,44 +364,30 @@
     <string>PushButton</string>
    </property>
   </widget>
-  <widget class="QSpinBox" name="spinBox_Max">
+  <widget class="QPushButton" name="pushButton_preparemode">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>230</x>
      <y>130</y>
-     <width>48</width>
-     <height>27</height>
+     <width>41</width>
+     <height>21</height>
     </rect>
    </property>
-  </widget>
-  <widget class="QSpinBox" name="spinBox_targetTmp">
-   <property name="geometry">
-    <rect>
-     <x>70</x>
-     <y>130</y>
-     <width>48</width>
-     <height>27</height>
-    </rect>
+   <property name="text">
+    <string>PushButton</string>
    </property>
   </widget>
-  <widget class="QSpinBox" name="spinBox_zlwz">
+  <widget class="QPushButton" name="pushButton_waitmode">
    <property name="geometry">
     <rect>
-     <x>130</x>
+     <x>280</x>
      <y>130</y>
-     <width>48</width>
-     <height>27</height>
+     <width>41</width>
+     <height>21</height>
     </rect>
    </property>
-  </widget>
-  <widget class="QSpinBox" name="spinBox_zlzq">
-   <property name="geometry">
-    <rect>
-     <x>180</x>
-     <y>130</y>
-     <width>48</width>
-     <height>27</height>
-    </rect>
+   <property name="text">
+    <string>PushButton</string>
    </property>
   </widget>
  </widget>

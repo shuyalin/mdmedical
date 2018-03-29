@@ -16,7 +16,6 @@
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
-#include <QtWidgets/QSpinBox>
 #include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
@@ -51,10 +50,8 @@ public:
     QPushButton *pushButton_td3;
     QPushButton *pushButton_td2;
     QPushButton *pushButton_td4;
-    QSpinBox *spinBox_Max;
-    QSpinBox *spinBox_targetTmp;
-    QSpinBox *spinBox_zlwz;
-    QSpinBox *spinBox_zlzq;
+    QPushButton *pushButton_preparemode;
+    QPushButton *pushButton_waitmode;
 
     void setupUi(QWidget *mdmedical)
     {
@@ -142,18 +139,12 @@ public:
         pushButton_td4 = new QPushButton(mdmedical);
         pushButton_td4->setObjectName(QStringLiteral("pushButton_td4"));
         pushButton_td4->setGeometry(QRect(310, 90, 61, 27));
-        spinBox_Max = new QSpinBox(mdmedical);
-        spinBox_Max->setObjectName(QStringLiteral("spinBox_Max"));
-        spinBox_Max->setGeometry(QRect(10, 130, 48, 27));
-        spinBox_targetTmp = new QSpinBox(mdmedical);
-        spinBox_targetTmp->setObjectName(QStringLiteral("spinBox_targetTmp"));
-        spinBox_targetTmp->setGeometry(QRect(70, 130, 48, 27));
-        spinBox_zlwz = new QSpinBox(mdmedical);
-        spinBox_zlwz->setObjectName(QStringLiteral("spinBox_zlwz"));
-        spinBox_zlwz->setGeometry(QRect(130, 130, 48, 27));
-        spinBox_zlzq = new QSpinBox(mdmedical);
-        spinBox_zlzq->setObjectName(QStringLiteral("spinBox_zlzq"));
-        spinBox_zlzq->setGeometry(QRect(180, 130, 48, 27));
+        pushButton_preparemode = new QPushButton(mdmedical);
+        pushButton_preparemode->setObjectName(QStringLiteral("pushButton_preparemode"));
+        pushButton_preparemode->setGeometry(QRect(230, 130, 41, 21));
+        pushButton_waitmode = new QPushButton(mdmedical);
+        pushButton_waitmode->setObjectName(QStringLiteral("pushButton_waitmode"));
+        pushButton_waitmode->setGeometry(QRect(280, 130, 41, 21));
 
         retranslateUi(mdmedical);
 
@@ -190,6 +181,8 @@ public:
         pushButton_td3->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_td2->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_td4->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
+        pushButton_preparemode->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
+        pushButton_waitmode->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
     } // retranslateUi
 
 };
