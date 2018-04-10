@@ -69,13 +69,23 @@ bool CSerial::openSerial(const char *name,int baudrate)
 /*构造要发送的数据*/
 void CSerial::ConstructionSendData(char command,char datalen,char *data)
 {
-	unsigned char checkcode,i,j,k;
+    unsigned char checkcode,i,j;
 	memset(m_senddata,0,sizeof(m_senddata));
 	m_senddata[0] = 0xAA;
 	m_senddata[1] = 0x0;
 	m_senddata[2] = datalen;
 	m_senddata[3] = command;
-	memcpy(m_senddata+4,data,datalen-1);
+
+//    char *tmp = data;
+//    int ii = 0;
+//    for(ii=0;ii<datalen-1;ii++)
+//    {
+//        printf("  %x  ",*tmp);
+//        tmp++;
+//    }
+//    printf("\n");
+    if(datalen != 1)
+        memcpy(m_senddata+4,data,datalen-1);
 
 	checkcode = m_senddata[1];
 	
@@ -147,10 +157,10 @@ void CSerial::GetSerNum(char period,char cycleNum,char realDataLen)
 }
 
 
-void CSerial::CureComand(float power,char realDataLen)
+void CSerial::CureComand(const char *power,char realDataLen)
 {
 	char buff[16] = {0};
-	gcvt(power,realDataLen,buff);
+    memcpy(buff,power,strlen(power));
 	ConstructionSendData(0x93,realDataLen+1,buff);	
 }
 
@@ -231,8 +241,10 @@ void CSerial::PwmiSend(char realDataLen)
 bool CSerial::SendData()
 {
     int j=0;
-    char k;
 	tcflush(m_fd, TCIOFLUSH);
+
+
+
 //    printf("senddata is : ");
 //    for(j=0;j<m_sendlen;j++)
 //    {
@@ -240,6 +252,9 @@ bool CSerial::SendData()
 //        printf(" %x  ",k);
 //    }
 //    printf("\n");
+
+
+
 
     if(write(m_fd,m_senddata,m_sendlen) < 0)
 	{
@@ -292,11 +307,12 @@ bool CSerial::RecvData()
 				i = 0;
 				while((read(m_fd,&buff[i++],1) > 0)&&(i<511));
 				buff[i] = '\0';
-
-                printf("receve data id : ");
-                for(j=0;j<i;j++)
-                    printf("  %x ",buff[j]);
-                printf("\n");
+#if 0
+               printf("receve data id : ");
+               for(j=0;j<i;j++)
+                   printf("  %x ",buff[j]);
+               printf("\n");
+#endif
 				memcpy(m_recvdata,buff,i);
 				fflush(stdout);
 				break;
@@ -712,15 +728,9 @@ bool CSerial::ParsePrepareSendReturnData()
 {
 	char *p_tmp;
 	bool status;
-    char i = 0;
     //char impedance[2] = {0};
 	GetRealDataField();
 	p_tmp = realDataFiled.p_datafiled;
-
-//    printf("realDataFiled.datalen %d\n",realDataFiled.datalen);
-//    for(i=0;i<realDataFiled.datalen;i++)
-//        printf(" 0x%x ",*(p_tmp++));
-//    printf(" \n");
 
 	if(realDataFiled.returnstatus == 0x00)
 	{
@@ -737,12 +747,8 @@ bool CSerial::ParsePrepareSendReturnData()
         else if(realDataFiled.datalen == 6)
         {
             impence =(*p_tmp);
-            //printf(" impence is  %d  %d  %hu ",*p_tmp,*(--p_tmp),impence);
-            printf("111    %d\n",*p_tmp);
             p_tmp++;
             impence = (impence<<8)|(*p_tmp);
-            printf("222    %d\n",*p_tmp);
-            printf(" impence is   %hu ",impence);
 
             p_tmp+=2;
             powerrate[0] = *p_tmp;
@@ -776,6 +782,7 @@ bool CSerial::ParsePwmdSendReturnData()
 
 bool CSerial::ParseIdleSendReturnData()
 {
+
     GetRealDataField();
     if(realDataFiled.returnstatus == 0x00)
         return true;

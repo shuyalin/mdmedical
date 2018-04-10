@@ -1,21 +1,13 @@
 #include "mdmedical.h"
 #include "ui_mdmedical.h"
 
-float currtmp;
 
-//char val;
-//void *func(void *args)
-//{
-//    while(1)
-//    {
-//        scanf("%c",&val);
-//        printf("%c\n",val);
-//    }
-//}
 
 float currTmp[8];
-bool isTmpFinished = false;
-bool isShowFinished = false;
+float showtmp[4];
+//bool isTmpFinished = false;
+//bool isShowFinished = false;
+int indexpower;
 
 bool g_bWaitCommand = false;
 
@@ -28,10 +20,51 @@ CSerial sel5;
 
 bool g_bPrerareMode = false;
 bool g_bIdleMode = false;
+bool g_bCureMode = false;
+bool g_bPwmdMode = false;
+bool g_bPwmiMode = false;
 
+bool g_bPrepareKey = false;
+bool g_bFootKey = false;
+bool m_bIsfootkeyPress;
 
+QVector<double> temp(600);  //zhengjian max
+QVector<double> temp1(600);  //zhengjian min
+QVector<double> temp2(600);  //nianmo Max
+QVector<double> temp3(600);  //nianmo Min
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;/*初始化互斥锁*/
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;/*初始化条件变量*/
+
+static char powerindex[21][5]={"0.1","0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0","5.5","6.0","6.5","7.0","7.5","8.0","8.5","9.0","9.5","10.0"};
+
+
+float ReturnMaxValue(float a,float b,float c,float d)
+{
+    int tmp;
+    if(a>b)
+        tmp = a;
+    else
+        tmp = b;
+    if(tmp<c)
+        tmp = c;
+    if(tmp<d)
+        tmp = d;
+    return tmp;
+}
+float ReturnMinValue(float a,float b,float c,float d)
+{
+    int tmp;
+    if(a>b)
+        tmp = b;
+    else
+        tmp = a;
+    if(tmp > c)
+        tmp = c;
+    if(tmp > d)
+        tmp = d;
+    return tmp;
+}
+
 
 void *SendSerialFun(void *args)
 {
@@ -66,13 +99,47 @@ bool Idle_send()
     return (ok1&&ok2&&ok3&&ok4);
 }
 
+bool cure_send()
+{
+    bool ok1=false,ok2=false,ok3=false,ok4=false;
+    sel1.CureComand(powerindex[indexpower],3);
+    sel1.SendData();
+    sel1.RecvData();
+    ok1 = sel1.ParseIdleSendReturnData();
+
+    sel2.CureComand(powerindex[indexpower],3);
+    sel2.SendData();
+    sel2.RecvData();
+    ok2 = sel2.ParseIdleSendReturnData();
+
+    sel4.CureComand(powerindex[indexpower],3);
+    sel4.SendData();
+    sel4.RecvData();
+    ok3 = sel4.ParseIdleSendReturnData();
+
+    sel5.CureComand(powerindex[indexpower],3);
+    sel5.SendData();
+    sel5.RecvData();
+    ok4 = sel5.ParseIdleSendReturnData();
+
+    return (ok1&&ok2&&ok3&&ok4);
+}
+
 void Prepare_send()
 {
+    float f;
+    float f1;
     sel1.PrepareSend(0);
     sel1.SendData();
     sel1.RecvData();
     sel1.ParsePrepareSendReturnData();
     impedance[0] = sel1.impence;
+    if(m_bIsfootkeyPress)
+    {
+        f = (float)(sel1.powerrate[0]-0x30) + ((float)(sel1.powerrate[2]-0x30)/10);
+        f1 = atof(powerindex[indexpower]);
+        //printf("   %f  %f   %s",f,f1,powerindex[indexpower]);
+    }
     //printf("the zukang is : %hu\n",sel1.impence);
     //printf("powerrate is  %d  %d  %d\n",sel1.powerrate[0],sel1.powerrate[1],sel1.powerrate[2]);
 
@@ -81,6 +148,12 @@ void Prepare_send()
     sel2.RecvData();
     sel2.ParsePrepareSendReturnData();
     impedance[1] = sel2.impence;
+    if(m_bIsfootkeyPress)
+    {
+        f = (float)(sel2.powerrate[0]-0x30) + ((float)(sel2.powerrate[2]-0x30)/10);
+        f1 = atof(powerindex[indexpower]);
+        //printf("   %f  %f",f,f1);
+    }
     //printf("the zukang is : %hu\n",sel2.impence);
     //printf("powerrate is  %d  %d  %d\n",sel2.powerrate[0],sel2.powerrate[1],sel2.powerrate[2]);
 
@@ -89,6 +162,12 @@ void Prepare_send()
     sel4.RecvData();
     sel4.ParsePrepareSendReturnData();
     impedance[2] = sel4.impence;
+    if(m_bIsfootkeyPress)
+    {
+        f = (float)(sel4.powerrate[0]-0x30) + ((float)(sel4.powerrate[2]-0x30)/10);
+        f1 = atof(powerindex[indexpower]);
+        //printf("   %f  %f",f,f1);
+    }
     //printf("the zukang is : %hu\n",sel4.impence);
     //printf("powerrate is  %d  %d  %d\n",sel4.powerrate[0],sel4.powerrate[1],sel4.powerrate[2]);
 
@@ -97,9 +176,69 @@ void Prepare_send()
     sel5.RecvData();
     sel5.ParsePrepareSendReturnData();
     impedance[3] = sel5.impence;
+    if(m_bIsfootkeyPress)
+    {
+        f = (float)(sel5.powerrate[0]-0x30) + ((float)(sel5.powerrate[2]-0x30)/10);
+        f1 = atof(powerindex[indexpower]);
+        //printf("   %f  %f",f,f1);
+    }
     //printf("the zukang is : %hu\n",sel5.impence);
     //printf("powerrate is  %d  %d  %d\n",sel5.powerrate[0],sel5.powerrate[1],sel5.powerrate[2]);
 }
+
+bool pwmd_send()
+{
+    bool ok1=false,ok2=false,ok3=false,ok4=false;
+    sel1.PwmdSend(0);
+    sel1.SendData();
+    sel1.RecvData();
+    ok1 = sel1.ParseIdleSendReturnData();
+
+    sel2.PwmdSend(0);
+    sel2.SendData();
+    sel2.RecvData();
+    ok2 = sel2.ParseIdleSendReturnData();
+
+    sel4.PwmdSend(0);
+    sel4.SendData();
+    sel4.RecvData();
+    ok3 = sel4.ParseIdleSendReturnData();
+
+    sel5.PwmdSend(0);
+    sel5.SendData();
+    sel5.RecvData();
+    ok4 = sel5.ParseIdleSendReturnData();
+
+    return (ok1&&ok2&&ok3&&ok4);
+}
+
+bool pwmi_send()
+{
+    bool ok1=false,ok2=false,ok3=false,ok4=false;
+    sel1.PwmiSend(0);
+    sel1.SendData();
+    sel1.RecvData();
+    ok1 = sel1.ParseIdleSendReturnData();
+
+    sel2.PwmiSend(0);
+    sel2.SendData();
+    sel2.RecvData();
+    ok2 = sel2.ParseIdleSendReturnData();
+
+    sel4.PwmiSend(0);
+    sel4.SendData();
+    sel4.RecvData();
+    ok3 = sel4.ParseIdleSendReturnData();
+
+    sel5.PwmiSend(0);
+    sel5.SendData();
+    sel5.RecvData();
+    ok4 = sel5.ParseIdleSendReturnData();
+
+    return (ok1&&ok2&&ok3&&ok4);
+}
+
+
 
 void *sel_send_func(void *args)
 {
@@ -113,12 +252,31 @@ void *sel_send_func(void *args)
         if(g_bPrerareMode && g_bWaitCommand)
         {
             Prepare_send();
-            usleep(800*1000);
+            g_bPrerareMode = false;
         }
-        else if(g_bIdleMode)
+        else
+        {
+            usleep(10*1000);
+        }
+        if(g_bIdleMode)
         {
             g_bWaitCommand = Idle_send();
-            usleep(1000*1000);
+            g_bIdleMode = false;
+        }
+        if(g_bCureMode)
+        {
+            cure_send();
+            g_bCureMode = false;
+        }
+        if(g_bPwmdMode)
+        {
+            pwmd_send();
+            g_bPwmdMode = false;
+        }
+        if(g_bPwmiMode)
+        {
+            pwmi_send();
+            g_bPwmiMode = false;
         }
         usleep(10*1000);
     }
@@ -265,7 +423,7 @@ void *GetCurrTmp(void *args)
 {
         unsigned short tmp,count = 0,min = 10000,max = 0;
         unsigned int sum_tmp = 0,i;
-        printf("start read temp!\n");
+        //printf("start read temp!\n");
         int fd = open("/dev/mdmedical_tmp", O_RDWR);
         if(fd < 0)
         {
@@ -297,11 +455,36 @@ void *GetCurrTmp(void *args)
 //                 if(i == 0 || i == 1)
 //                        printf("the value is  %d    %.1f\n",i,currTmp[i]);
             }
-            isTmpFinished = true;
-            while(!isShowFinished)
-                usleep(1*1000);
+            usleep(400*1000);
+            //isTmpFinished = true;
+            //while(!isShowFinished)
+            //    usleep(1*1000);
         }
 }
+
+void *detect_key_func(void *args)
+{
+    unsigned char key_val;
+    int fd = open("/dev/mdmedical_buttons", O_RDWR);
+    if(fd < 0)
+    {
+        printf("open device failed!\n");
+    }
+    while(1)
+    {
+        read(fd, &key_val, 1);
+        if(key_val == 0x1)
+        {
+            g_bPrepareKey = true;
+        }
+        else if(key_val == 0x2)
+        {
+            g_bFootKey = true;
+        }
+        printf("key_val = 0x%x\n", key_val);
+    }
+}
+
 
 mdmedical::mdmedical(QWidget *parent) :
     QWidget(parent),
@@ -317,13 +500,52 @@ mdmedical::mdmedical(QWidget *parent) :
         widget->addGraph();
         widget->addGraph();
         widget->addGraph();
+        widget->addGraph();
+        widget->xAxis->setRange(0,200);
+        widget->yAxis->setRange(20,80);
+
+
+
+
+        widget->graph(0)->setName("fist line");
+
+        widget->graph(1)->setName("second line");
+        widget->graph(1)->setPen(QPen(QColor(255,0,0)));
+
+        widget->graph(2)->setName("third line");
+        widget->graph(2)->setPen(QPen(QColor(255,0,0)));
+
+        widget->graph(3)->setName("four line");
+        widget->graph(3)->setPen(QPen(QColor(0,255,0)));
+
+        widget->graph(1)->setBrush(QBrush(QColor(0, 0, 255, 20))); //设置曲线下方颜色
+
+        widget->xAxis->setSubTickCount(9);
+
+        widget->xAxis->setLabel(QString::fromUtf8("时间"));
+        widget->yAxis->setLabel(QString::fromUtf8("温度"));
+
+        QLinearGradient axisRectGradient;
+        axisRectGradient.setStart(0, 0);
+        axisRectGradient.setFinalStop(0, 350);
+        axisRectGradient.setColorAt(0, QColor(80, 80, 80));
+        axisRectGradient.setColorAt(1, QColor(30, 30, 30));
+        widget->axisRect()->setBackground(axisRectGradient);
 
         closegraph = 0;
+        m_calibate_count = 0;
+        m_bIsfootkeyPress = false;
+
+        m_QProcess_calibration = new QProcess();
+
 
         m_pQTimer_showtime = new QTimer(this);
         m_pQTimer_showgraph = new QTimer(this);
         m_pQTimer_showtmp = new QTimer(this);
         m_pQTimer_showimpedance = new QTimer(this);
+        m_pQTimer_preparestatus = new QTimer(this);
+        m_pQTimer_detectkey = new QTimer(this);
+        m_pQTimer_detectcalibrate = new QTimer(this);
 
          m_QComboBox_cureperiod = new QComboBox(this);
          InitCureReriodSubWidgets();
@@ -334,12 +556,17 @@ mdmedical::mdmedical(QWidget *parent) :
          m_QComboBox_curepos = new QComboBox(this);
          InitCurePosSubWidgets();
 
+         m_QLabel_pic1 = new QLabel(this);
+
 
 
         connect(m_pQTimer_showtime, SIGNAL(timeout()), this, SLOT(ShowTimeCurrent()));
         connect(m_pQTimer_showgraph, SIGNAL(timeout()), this, SLOT(makeGraph()));
         connect(m_pQTimer_showtmp, SIGNAL(timeout()), this, SLOT(ShowCurrentTmp()));
         connect(m_pQTimer_showimpedance, SIGNAL(timeout()), this, SLOT(showCurrentImpedance()));
+        connect(m_pQTimer_preparestatus, SIGNAL(timeout()), this, SLOT(ChangePrepareStatus()));
+        connect(m_pQTimer_detectkey, SIGNAL(timeout()), this, SLOT(DetectKey()));
+        connect(m_pQTimer_detectcalibrate, SIGNAL(timeout()), this, SLOT(DetectCalibrate()));
 
         connect(ui->pushButton_td1,SIGNAL(clicked()),this,SLOT(GetChanel1Value()));
         connect(ui->pushButton_td2,SIGNAL(clicked()),this,SLOT(GetChanel2Value()));
@@ -442,11 +669,12 @@ mdmedical::mdmedical(QWidget *parent) :
         ui->pushButton_td3->setGeometry(710,280,40,20);
         ui->pushButton_td4->setGeometry(680,255,40,20);
 
-        ui->pushButton_preparemode->setGeometry(800,600,100,30);
-        ui->pushButton_preparemode->setText(QString::fromUtf8("预备模式"));
 
         ui->pushButton_waitmode->setGeometry(800,650,100,30);
         ui->pushButton_waitmode->setText(QString::fromUtf8("待机模式"));
+
+        ui->pushButton_calibrate->setGeometry(800,600,100,30);
+        ui->pushButton_calibrate->setText(QString::fromUtf8("calibrate"));
 
         ui->label_tagetTmp->setGeometry(680,75,100,20);
         ui->label_tagetTmp->setText(QString::fromUtf8("目标温度"));
@@ -487,38 +715,56 @@ mdmedical::mdmedical(QWidget *parent) :
         ui->pushButton_addgas->setText(QString::fromUtf8("充气"));
         ui->pushButton_losegas->setText(QString::fromUtf8("放气"));
 
-        ui->pushButton_footkey->setGeometry(450,360,70,30);
-        ui->pushButton_footkey->setText(QString::fromUtf8("脚踏按键"));
 
-        QPixmap pixmap(QString::fromUtf8(RES_POS"step2.png"));//当前文件夹下面的图片
-        QPalette palette = this->palette();
-        palette.setBrush(backgroundRole(),QBrush(pixmap.scaled(// 缩放背景图.
-                                                               QSize(800,600),
-                                                                      Qt::IgnoreAspectRatio,
-                                                                      Qt::SmoothTransformation)));
-        setPalette(palette);
 
-//        sel1.openSerial(115200);
-//        sel2.openSerial(115200);
-//        sel4.openSerial(115200);
-//        sel5.openSerial(115200);
+        m_QLabel_pic1->setGeometry(205,200,180,180);
+        m_QLabel_pic1->setPixmap(QPixmap(RES_POS"step3.jpg"));
+        m_QLabel_pic1->setScaledContents(true) ;
+        //m_QLabel_pic1->setVisible(0);
+
+
+#if 0
+       QPixmap pixmap(QString::fromUtf8(RES_POS"step2.jpg"));//当前文件夹下面的图片
+       QPalette palette = this->palette();
+       palette.setBrush(backgroundRole(),QBrush(pixmap.scaled(// 缩放背景图.
+                                                              QSize(800,600),
+                                                                     Qt::IgnoreAspectRatio,
+                                                                     Qt::SmoothTransformation)));
+       setPalette(palette);
+#endif
+
+
+       m_pQTimer_detectkey->start(10);
 
         m_pQTimer_showtime->start(1000);
 
-        m_pQTimer_showtmp->start(1000);
+        m_pQTimer_showtmp->start(500);
 
         pthread_t tid;
         int ret;
         ret = pthread_create(&tid,NULL,GetCurrTmp,NULL);
-
+        if(ret != 0)
+        {
+            printf("create GetCurrTmp pthread failed!\n");
+        }
+#if 1
         pthread_t sel_send_tid;
         int ret1;
         ret1 = pthread_create(&sel_send_tid,NULL,sel_send_func,NULL);
-/*
-        pthread_t sel_recv_tid;
+        if(ret1 != 0)
+        {
+            printf("create sel_send_func pthread failed!\n");
+        }
+#endif
+#if 1
+        pthread_t detect_key_tid;
         int ret2;
-        ret2 = pthread_create(&sel_recv_tid,NULL,sel_recv_func,NULL);
-*/
+        ret2 = pthread_create(&detect_key_tid,NULL,detect_key_func,NULL);
+        if(ret2 != 0)
+        {
+            printf("create detect_key_func pthread failed!\n");
+        }
+#endif
 }
 
 mdmedical::~mdmedical()
@@ -594,10 +840,10 @@ void mdmedical::InitCureReriodSubWidgets()
 
     m_QComboBox_cureperiod->addItem(QWidget::tr("10:00"));
 
-    m_QComboBox_cureperiod->setEditable(true);
-    m_QComboBox_cureperiod->setMaxVisibleItems(10);
-     m_QComboBox_cureperiod->insertItem(55, tr("Insert item"));
-     m_QComboBox_cureperiod->insertSeparator(55);
+    //m_QComboBox_cureperiod->setEditable(true);
+//    m_QComboBox_cureperiod->setMaxVisibleItems(10);
+//     m_QComboBox_cureperiod->insertItem(55, tr("Insert item"));
+//     m_QComboBox_cureperiod->insertSeparator(55);
 
 }
 
@@ -654,10 +900,10 @@ void mdmedical::InitTargetTempSubWidgets()
     m_QComboBox_targettemp->addItem(QWidget::tr("94"));
     m_QComboBox_targettemp->addItem(QWidget::tr("95"));
 
-    m_QComboBox_targettemp->setEditable(true);
-    m_QComboBox_targettemp->setMaxVisibleItems(10);
-     m_QComboBox_targettemp->insertItem(46, tr("Insert item"));
-     m_QComboBox_targettemp->insertSeparator(46);
+    //m_QComboBox_targettemp->setEditable(true);
+//    m_QComboBox_targettemp->setMaxVisibleItems(10);
+//     m_QComboBox_targettemp->insertItem(46, tr("Insert item"));
+//     m_QComboBox_targettemp->insertSeparator(46);
 }
 
 void mdmedical::InitMaxPowerSubWidgets()
@@ -684,10 +930,10 @@ void mdmedical::InitMaxPowerSubWidgets()
     m_QComboBox_maxpower->addItem(QWidget::tr("9.5"));
     m_QComboBox_maxpower->addItem(QWidget::tr("10.0"));
 
-    m_QComboBox_maxpower->setEditable(true);
-    m_QComboBox_maxpower->setMaxVisibleItems(10);
-     m_QComboBox_maxpower->insertItem(21, tr("Insert item"));
-     m_QComboBox_maxpower->insertSeparator(21);
+    //m_QComboBox_maxpower->setEditable(true);
+//    m_QComboBox_maxpower->setMaxVisibleItems(10);
+//     m_QComboBox_maxpower->insertItem(21, tr("Insert item"));
+//     m_QComboBox_maxpower->insertSeparator(21);
 
 }
 
@@ -775,13 +1021,10 @@ void mdmedical::InitCurePosSubWidgets()
     m_QComboBox_curepos->addItem(QWidget::tr("64.5"));
     m_QComboBox_curepos->addItem(QWidget::tr("65.0"));
 
-    m_QComboBox_curepos->setEditable(true);
-    m_QComboBox_curepos->setMaxVisibleItems(10);
-     m_QComboBox_curepos->insertItem(81, tr("Insert item"));
-     m_QComboBox_curepos->insertSeparator(81);
-
-
-
+    //m_QComboBox_curepos->setEditable(true);
+//    m_QComboBox_curepos->setMaxVisibleItems(10);
+//     m_QComboBox_curepos->insertItem(81, tr("Insert item"));
+//     m_QComboBox_curepos->insertSeparator(81);
 }
 void mdmedical::ShowTimeCurrent(void)
 {
@@ -799,7 +1042,7 @@ void mdmedical::ShowTimeCurrent(void)
 void mdmedical::ShowCurrentTmp(void)
 {
     //isShowFinished = false;
-    if(isTmpFinished)
+    //if(isTmpFinished)
     {
         QString data1 = QString("%1").arg(currTmp[0]);
         QString data2 = QString("%1").arg(currTmp[1]);
@@ -818,7 +1061,7 @@ void mdmedical::ShowCurrentTmp(void)
         ui->label_tmp7->setText(data6.mid(0,4));
         ui->label_tmp8->setText(data8.mid(0,4));
 
-        isShowFinished = true;
+        //isShowFinished = true;
     }
 
 }
@@ -832,92 +1075,36 @@ void mdmedical::showCurrentImpedance(void)
 
 }
 
+void mdmedical::ChangePrepareStatus()
+{
+    g_bPrerareMode = true;
+}
+
 void mdmedical::makeGraph()
 {
-
-    if((closegraph++) == originalInfo.cureCycle*60 || (originalInfo.targetTmp < currTmp[originalInfo.chanel-1]))
+    if((closegraph++) ==  100/*(originalInfo.cureCycle*10+60)*2*/)
     {
-        if(m_pQTimer_showtime->isActive())
-            m_pQTimer_showtime->stop();
+        printf("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq\n");
+        if(m_pQTimer_showgraph->isActive())
+            m_pQTimer_showgraph->stop();
 
         closegraph = 0;
         //HShowAllWidget();
         OriginalPosition();
         widget->setVisible(0);
-        ui->pushButton_footkey->setVisible(1);
 
-        QPixmap pixmap(QString::fromUtf8(RES_POS"step2.png"));//当前文件夹下面的图片
-        QPalette palette = this->palette();
-        palette.setBrush(backgroundRole(),QBrush(pixmap.scaled(// 缩放背景图.
-                                                               QSize(800,600),
-                                                                      Qt::IgnoreAspectRatio,
-                                                                      Qt::SmoothTransformation)));
-        setPalette(palette);
-    }
-    widget->replot();
+        m_QLabel_pic1->setGeometry(205,200,180,180);
+        m_QLabel_pic1->setPixmap(QPixmap(RES_POS"step3.jpg"));
 
 
-
-    QVector<double> x(200),y0(200),y1(200),y2(200);
-    for(int i=0;i<200;i++)
-    {
-        if(i == 0)
-        {
-            x[i]=i;
-            y0[i]=rand()%3+35;
-            y1[i]=50;
-            y2[i]=setvalue;
-
-        }
-        else
-        {
-            if(i%2==0)
-            {
-                x[i]=i;
-                y0[i]=rand()%2+y0[i-1];
-                y1[i]=50;
-                y2[i]=setvalue;
-            }
-            else
-            {
-                x[i]=i;
-                y0[i]=y0[i-1]-rand()%2;
-                y1[i]=50;
-                y2[i]=setvalue;
-            }
-        }
     }
 
-    //创建QCustomPlot,添加曲线graph,并设置曲线的数据
-    //QCustomPlot *customPlot=new QCustomPlot;
+    temp[closegraph] = ReturnMaxValue(currTmp[0],currTmp[2],currTmp[4],currTmp[6]);
+    temp1[closegraph] = ReturnMinValue(currTmp[0],currTmp[2],currTmp[4],currTmp[6]);
+    temp2[closegraph] = ReturnMaxValue(currTmp[1],currTmp[3],currTmp[5],currTmp[7]);
+    temp3[closegraph] = ReturnMinValue(currTmp[1],currTmp[3],currTmp[5],currTmp[7]);
 
-    widget->xAxis->setRange(0,200);
-    widget->yAxis->setRange(30,80);
-
-    widget->graph(0)->setName("fist line");
-    widget->graph(0)->setData(x,y0);
-
-    widget->graph(1)->setName("second line");
-    widget->graph(1)->setData(x,y1);
-    widget->graph(1)->setPen(QPen(QColor(255,0,0)));
-
-    widget->graph(2)->setName("third line");
-    widget->graph(2)->setData(x,y2);
-    widget->graph(2)->setPen(QPen(QColor(255,0,0)));
-
-    widget->graph(1)->setBrush(QBrush(QColor(0, 0, 255, 20))); //设置曲线下方颜色
-
-    widget->xAxis->setSubTickCount(9);
-    //widget->xAxis->setTicks(false); //刻度是否可见
-    //widget->xAxis->setTickStep(100);
-
-
-
-    widget->xAxis->setLabel(QString::fromUtf8("时间"));
-    widget->yAxis->setLabel(QString::fromUtf8("温度"));
-
-
-    //设置坐标背景色
+#if 0
     QLinearGradient axisRectGradient;
     axisRectGradient.setStart(0, 0);
     axisRectGradient.setFinalStop(0, 350);
@@ -925,19 +1112,33 @@ void mdmedical::makeGraph()
     axisRectGradient.setColorAt(1, QColor(30, 30, 30));
     widget->axisRect()->setBackground(axisRectGradient);
 
+#endif
 
 
 
-    //设置画布背景色
-//     QLinearGradient plotGradient;
-//     plotGradient.setStart(0, 0);
-//     plotGradient.setFinalStop(0, 350);
-//     plotGradient.setColorAt(0, QColor(80, 80, 80));
-//     plotGradient.setColorAt(1, QColor(50, 50, 50));
-//     widget->setBackground(plotGradient);
+    QVector<double> x(600),y0(600),y1(600),y2(600),y3(600);
+    for(int i=0;i<closegraph+1;i++)
+    {
 
+            x[i]=i;
+            y0[i]=temp[i];
+            y1[i]=temp1[i];
+            y2[i]=temp2[i];
+            y3[i]=temp3[i];
+    }
 
+    widget->graph(0)->setData(x,y0);
 
+    widget->graph(1)->setData(x,y1);
+//    widget->graph(1)->setPen(QPen(QColor(255,0,0)));
+
+    widget->graph(2)->setData(x,y2);
+    widget->graph(3)->setData(x,y3);
+//    widget->graph(1)->setBrush(QBrush(QColor(0, 0, 255, 20))); //设置曲线下方颜色
+
+//    widget->xAxis->setSubTickCount(9);
+//    //widget->xAxis->setTicks(false); //刻度是否可见
+//    //widget->xAxis->setTickStep(100);
 
     //显示铭文
     widget->legend->setVisible(true);
@@ -946,6 +1147,8 @@ void mdmedical::makeGraph()
     widget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
     widget->axisRect()->setRangeDrag(Qt::Horizontal);  //设置允许在某一方向上拽托
     widget->axisRect()->setRangeZoom(Qt::Horizontal);  //设置允许在某一方向上伸缩
+
+    widget->replot();
 }
 
 void mdmedical::HideAllWidget()
@@ -1015,18 +1218,7 @@ void mdmedical::HShowAllWidget()
 void mdmedical::on_pushButton_footkey_clicked()
 {
     qDebug()<<originalInfo.chanel<<"  "<<originalInfo.cureCycle<<"  "<<originalInfo.curePos<<"  "<<originalInfo.maxPower<<"  "<<originalInfo.targetTmp<<endl;
-    ItemNewPosition();
 
-    m_pQTimer_showgraph->start(100);
-    widget->setVisible(1);
-    ui->pushButton_footkey->setVisible(0);
-    QPixmap pixmap(QString::fromUtf8(RES_POS"step3.png"));//当前文件夹下面的图片
-    QPalette palette = this->palette();
-    palette.setBrush(backgroundRole(),QBrush(pixmap.scaled(// 缩放背景图.
-                                                           QSize(800,600),
-                                                                  Qt::IgnoreAspectRatio,
-                                                                  Qt::SmoothTransformation)));
-    setPalette(palette);
 }
 
 void mdmedical::ItemNewPosition()
@@ -1069,7 +1261,6 @@ void mdmedical::OriginalPosition()
 void mdmedical::GetCureCycleCurrentValue()
 {
     originalInfo.cureCycle = m_QComboBox_cureperiod->currentIndex();
-    qDebug()<<"originalInfo.cureCycle is "<<originalInfo.cureCycle;
 }
 
 void mdmedical::GetTargetTmpCurrentValue()
@@ -1102,13 +1293,6 @@ void mdmedical::GetChanel4Value()
 }
 
 
-void mdmedical::on_pushButton_preparemode_clicked()
-{
-    //g_bPrerareMode = true;
-    g_bIdleMode = true;
-    m_pQTimer_showimpedance->start(1000);
-
-}
 
 void mdmedical::on_pushButton_waitmode_clicked()
 {
@@ -1123,4 +1307,54 @@ void mdmedical::on_pushButton_waitmode_clicked()
     ui->label_impedance3->setText("");
     ui->label_impedance4->setText("");
 
+}
+void mdmedical::DetectKey()
+{
+    if(g_bPrepareKey)
+    {
+        g_bIdleMode = true;
+       g_bPrerareMode = true;
+        m_pQTimer_showimpedance->start(1000);
+        m_pQTimer_preparestatus->start(1000);
+        g_bPrepareKey = false;
+        printf("vvvvvvvvvvvvvvvvvvvvvvvvvv\n");
+    }
+    if(g_bFootKey)
+    {
+        m_pQTimer_showgraph->start(1000);
+        ItemNewPosition();
+
+        indexpower = originalInfo.maxPower;
+        m_bIsfootkeyPress = true;
+        m_QLabel_pic1->setGeometry(430,110,130,130);
+        m_QLabel_pic1->setPixmap(QPixmap(RES_POS"step4.jpg"));
+
+        g_bCureMode = true;
+
+        widget->setVisible(1);
+        g_bFootKey = false;
+    }
+}
+
+void mdmedical::on_pushButton_calibrate_clicked()
+{
+    if((m_calibate_count++) > 5)
+    {
+        this->hide();
+        m_pQTimer_detectcalibrate->start(1000);
+        m_calibate_count = 0;
+        if(m_QProcess_calibration->isOpen())
+            m_QProcess_calibration->close();
+        m_QProcess_calibration->start("ts_calibrate");
+    }
+}
+
+void mdmedical::DetectCalibrate()
+{
+    if(m_QProcess_calibration->state() == 0)
+    {
+        this->show();
+        if(m_pQTimer_detectcalibrate->isActive())
+            m_pQTimer_detectcalibrate->stop();
+    }
 }

@@ -286,19 +286,6 @@
     <string>PushButton</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_footkey">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>90</y>
-     <width>51</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>PushButton</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="pushButton_losegas">
    <property name="geometry">
     <rect>
@@ -364,10 +351,10 @@
     <string>PushButton</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_preparemode">
+  <widget class="QPushButton" name="pushButton_waitmode">
    <property name="geometry">
     <rect>
-     <x>230</x>
+     <x>280</x>
      <y>130</y>
      <width>41</width>
      <height>21</height>
@@ -377,13 +364,13 @@
     <string>PushButton</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="pushButton_waitmode">
+  <widget class="QPushButton" name="pushButton_calibrate">
    <property name="geometry">
     <rect>
-     <x>280</x>
-     <y>130</y>
+     <x>0</x>
+     <y>120</y>
      <width>41</width>
-     <height>21</height>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">

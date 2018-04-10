@@ -57,7 +57,7 @@ class CSerial
 		
 		void GetSerNum(char period,char cycleNum,char realDataLen);
 		
-		void CureComand(float power,char realDataLen);
+        void CureComand(const char *power,char realDataLen);
 		
 		void WriteUserInfo(char areaNum,char writeDataLen,char realDataLen);
 		
@@ -115,6 +115,7 @@ class CSerial
         unsigned short impence;
         char m_recvdata[128];
         char powerrate[3];
+
 
 
 	private:

@@ -569,6 +569,7 @@ moc_mdmedical.cpp: ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/a
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QVector \
 		qcustomplot.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QObject \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QPointer \
@@ -579,7 +580,6 @@ moc_mdmedical.cpp: ../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/a
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpen.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/QPaintEvent \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/QMouseEvent \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QVector \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QDateTime \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QMultiMap \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QFlags \
@@ -1563,6 +1563,7 @@ main.o: main.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QVector \
 		qcustomplot.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QObject \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QPointer \
@@ -1573,7 +1574,6 @@ main.o: main.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpen.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/QPaintEvent \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/QMouseEvent \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QVector \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QDateTime \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QMultiMap \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QFlags \
@@ -2053,6 +2053,7 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QVector \
 		qcustomplot.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QObject \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QPointer \
@@ -2063,7 +2064,6 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpen.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/QPaintEvent \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/QMouseEvent \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QVector \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QDateTime \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QMultiMap \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QFlags \
@@ -2415,8 +2415,7 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QButtonGroup \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QHeaderView \
 		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QPushButton \
-		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QSpinBox
+		../../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QPushButton
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mdmedical.o mdmedical.cpp
 
 qcustomplot.o: qcustomplot.cpp qcustomplot.h \

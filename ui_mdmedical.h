@@ -44,14 +44,13 @@ public:
     QLabel *label_zlwz;
     QLabel *label_zlzq;
     QPushButton *pushButton_addgas;
-    QPushButton *pushButton_footkey;
     QPushButton *pushButton_losegas;
     QPushButton *pushButton_td1;
     QPushButton *pushButton_td3;
     QPushButton *pushButton_td2;
     QPushButton *pushButton_td4;
-    QPushButton *pushButton_preparemode;
     QPushButton *pushButton_waitmode;
+    QPushButton *pushButton_calibrate;
 
     void setupUi(QWidget *mdmedical)
     {
@@ -121,9 +120,6 @@ public:
         pushButton_addgas = new QPushButton(mdmedical);
         pushButton_addgas->setObjectName(QStringLiteral("pushButton_addgas"));
         pushButton_addgas->setGeometry(QRect(0, 90, 51, 27));
-        pushButton_footkey = new QPushButton(mdmedical);
-        pushButton_footkey->setObjectName(QStringLiteral("pushButton_footkey"));
-        pushButton_footkey->setGeometry(QRect(50, 90, 51, 27));
         pushButton_losegas = new QPushButton(mdmedical);
         pushButton_losegas->setObjectName(QStringLiteral("pushButton_losegas"));
         pushButton_losegas->setGeometry(QRect(100, 90, 61, 27));
@@ -139,12 +135,12 @@ public:
         pushButton_td4 = new QPushButton(mdmedical);
         pushButton_td4->setObjectName(QStringLiteral("pushButton_td4"));
         pushButton_td4->setGeometry(QRect(310, 90, 61, 27));
-        pushButton_preparemode = new QPushButton(mdmedical);
-        pushButton_preparemode->setObjectName(QStringLiteral("pushButton_preparemode"));
-        pushButton_preparemode->setGeometry(QRect(230, 130, 41, 21));
         pushButton_waitmode = new QPushButton(mdmedical);
         pushButton_waitmode->setObjectName(QStringLiteral("pushButton_waitmode"));
         pushButton_waitmode->setGeometry(QRect(280, 130, 41, 21));
+        pushButton_calibrate = new QPushButton(mdmedical);
+        pushButton_calibrate->setObjectName(QStringLiteral("pushButton_calibrate"));
+        pushButton_calibrate->setGeometry(QRect(0, 120, 41, 16));
 
         retranslateUi(mdmedical);
 
@@ -175,14 +171,13 @@ public:
         label_zlwz->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         label_zlzq->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         pushButton_addgas->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
-        pushButton_footkey->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_losegas->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_td1->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_td3->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_td2->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_td4->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
-        pushButton_preparemode->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_waitmode->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
+        pushButton_calibrate->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
     } // retranslateUi
 
 };

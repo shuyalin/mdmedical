@@ -13,7 +13,8 @@
 #include <QPalette>
 #include <QMessageBox>
 #include <QComboBox>
-
+#include <QVector>
+#include <QProcess>
 
 #include <stdio.h>
 #include <linux/types.h>
@@ -25,6 +26,7 @@
 #include <errno.h>
 #include <assert.h>
 #include <string.h>
+
 
 #include "qcustomplot.h"
 #include "serial.h"
@@ -40,6 +42,9 @@
 #define SERIAL5 "/dev/ttyS5"
 #define SERIAL6 "/dev/ttyS6"
 #define SERIAL7 "/dev/ttyS7"
+
+
+
 
 typedef struct CCurrentInfo
 {
@@ -75,6 +80,10 @@ private:
     QTimer *m_pQTimer_showgraph;
     QTimer *m_pQTimer_showtmp;
     QTimer *m_pQTimer_showimpedance;
+    QTimer *m_pQTimer_preparestatus;
+    QTimer *m_pQTimer_detectkey;
+    QTimer *m_pQTimer_detectcalibrate;
+
     QCustomPlot *widget;
     int closegraph;
     int setvalue;
@@ -89,9 +98,12 @@ private:
     QComboBox  *m_QComboBox_maxpower;
     QComboBox  *m_QComboBox_curepos;
 
+    QLabel *m_QLabel_pic1;
 
+    QProcess *m_QProcess_calibration;
 
-
+    int m_plot_i;
+    int m_calibate_count;
 public slots:
     void ShowTimeCurrent(void);
     void makeGraph();
@@ -101,6 +113,7 @@ public slots:
     void OriginalPosition();
     void ShowCurrentTmp();
     void showCurrentImpedance();
+    void ChangePrepareStatus();
 
 private slots:
     void on_pushButton_footkey_clicked();
@@ -112,13 +125,16 @@ private slots:
    void GetChanel2Value();
    void GetChanel3Value();
    void GetChanel4Value();
+   void DetectKey();
+   void DetectCalibrate();
 
 
 
 
-   void on_pushButton_preparemode_clicked();
 
    void on_pushButton_waitmode_clicked();
+
+   void on_pushButton_calibrate_clicked();
 
 private:
     Ui::mdmedical *ui;
