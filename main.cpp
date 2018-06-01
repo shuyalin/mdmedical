@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 
     mdmedical w;
     w.setFixedSize(1024,768);
-#if 0
+#if 1
     int id = QFontDatabase::addApplicationFont("/usr/lib/fonts/DroidSansFallback.ttf");
     QString msyh = QFontDatabase::applicationFontFamilies (id).at(0);
     QFont font(msyh,10);

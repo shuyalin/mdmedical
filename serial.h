@@ -76,6 +76,10 @@ class CSerial
 		void PwmdSend(char realDataLen);
 		
 		void PwmiSend(char realDataLen);
+
+        void PwmKeepSend(char realDataLen);
+
+        void CureClosed(char realDataLen);
 		
 		bool SendData();
 		
@@ -111,6 +115,8 @@ class CSerial
 
         bool ParseIdleSendReturnData();
 
+        bool ParseCureSendReturnData();
+
         int m_fd;
         unsigned short impence;
         char m_recvdata[128];
@@ -118,10 +124,12 @@ class CSerial
 
 
 
+
 	private:
 
 		char m_senddata[128];
         char m_sendlen;
+        char serialname[16];
 		CRETURNDATAARCH realDataFiled;
 };
 

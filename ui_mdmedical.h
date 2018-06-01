@@ -51,6 +51,10 @@ public:
     QPushButton *pushButton_td4;
     QPushButton *pushButton_waitmode;
     QPushButton *pushButton_calibrate;
+    QLabel *label_showcam;
+    QPushButton *pushButton_showcam;
+    QPushButton *pushButton_takephoto;
+    QPushButton *pushButton_closecam;
 
     void setupUi(QWidget *mdmedical)
     {
@@ -141,6 +145,18 @@ public:
         pushButton_calibrate = new QPushButton(mdmedical);
         pushButton_calibrate->setObjectName(QStringLiteral("pushButton_calibrate"));
         pushButton_calibrate->setGeometry(QRect(0, 120, 41, 16));
+        label_showcam = new QLabel(mdmedical);
+        label_showcam->setObjectName(QStringLiteral("label_showcam"));
+        label_showcam->setGeometry(QRect(0, 140, 41, 16));
+        pushButton_showcam = new QPushButton(mdmedical);
+        pushButton_showcam->setObjectName(QStringLiteral("pushButton_showcam"));
+        pushButton_showcam->setGeometry(QRect(40, 140, 51, 21));
+        pushButton_takephoto = new QPushButton(mdmedical);
+        pushButton_takephoto->setObjectName(QStringLiteral("pushButton_takephoto"));
+        pushButton_takephoto->setGeometry(QRect(100, 140, 41, 21));
+        pushButton_closecam = new QPushButton(mdmedical);
+        pushButton_closecam->setObjectName(QStringLiteral("pushButton_closecam"));
+        pushButton_closecam->setGeometry(QRect(150, 140, 41, 21));
 
         retranslateUi(mdmedical);
 
@@ -178,6 +194,10 @@ public:
         pushButton_td4->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_waitmode->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_calibrate->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
+        label_showcam->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
+        pushButton_showcam->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
+        pushButton_takephoto->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
+        pushButton_closecam->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
     } // retranslateUi
 
 };

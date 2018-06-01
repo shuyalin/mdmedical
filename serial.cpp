@@ -8,6 +8,7 @@ CSerial::CSerial()
     impence = 0;
 	memset(m_senddata,0,128);
 	memset(m_recvdata,0,128);
+    memset(serialname,0,16);
 }
 CSerial::~CSerial()
 {
@@ -17,6 +18,14 @@ CSerial::~CSerial()
 bool CSerial::openSerial(const char *name,int baudrate)
 {
 	struct termios options;
+    if(strlen(name) > 15)
+    {
+        printf("%s name error!\n",name);
+    }
+    else
+    {
+        strcpy(serialname,name);
+    }
     if((m_fd = open(name,O_RDWR|O_NOCTTY|O_NDELAY))==-1)
     {
         printf("Open %s device fail\n",name);
@@ -237,6 +246,16 @@ void CSerial::PwmiSend(char realDataLen)
 	char buff[16] = {0};
 	ConstructionSendData(0x96,realDataLen+1,buff);
 }
+void CSerial::PwmKeepSend(char realDataLen)
+{
+    char buff[16] = {0};
+    ConstructionSendData(0x98,realDataLen+1,buff);
+}
+void CSerial::CureClosed(char realDataLen)
+{
+    char buff[16] = {0};
+    ConstructionSendData(0x97,realDataLen+1,buff);
+}
 
 bool CSerial::SendData()
 {
@@ -244,15 +263,16 @@ bool CSerial::SendData()
 	tcflush(m_fd, TCIOFLUSH);
 
 
-
-//    printf("senddata is : ");
-//    for(j=0;j<m_sendlen;j++)
-//    {
-//        k = m_senddata[j];
-//        printf(" %x  ",k);
-//    }
-//    printf("\n");
-
+#if 0
+    char k;
+    printf("senddata is : ");
+    for(j=0;j<m_sendlen;j++)
+    {
+        k = m_senddata[j];
+        printf(" %x  ",k);
+    }
+    printf("\n");
+#endif
 
 
 
@@ -274,12 +294,14 @@ bool CSerial::RecvData()
 	int ret;
 	char buff[512];
 	int len;
-	tv.tv_sec = 5;
+    tv.tv_sec = 1;
 	tv.tv_usec = 0; 	
 	fflush(stdout);
 
 	while(1)
 	{
+        tv.tv_sec = 1;
+        tv.tv_usec = 0;
 
 		FD_ZERO(&rdfds);   
 		FD_SET(0,&rdfds);
@@ -297,7 +319,8 @@ bool CSerial::RecvData()
 		}
 		else if(ret == 0)
 		{
-			continue;
+            printf("%s  receve data timeout!\n",serialname);
+            break;
 		}
 		else
 		{  
@@ -784,6 +807,19 @@ bool CSerial::ParseIdleSendReturnData()
 {
 
     GetRealDataField();
+    if(realDataFiled.p_datafiled)
+        free(realDataFiled.p_datafiled);
+    if(realDataFiled.returnstatus == 0x00)
+        return true;
+    else
+        return false;
+}
+bool CSerial::ParseCureSendReturnData()
+{
+
+    GetRealDataField();
+    if(realDataFiled.p_datafiled)
+        free(realDataFiled.p_datafiled);
     if(realDataFiled.returnstatus == 0x00)
         return true;
     else

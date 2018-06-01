@@ -15,6 +15,12 @@
 #include <QComboBox>
 #include <QVector>
 #include <QProcess>
+#include <QProgressBar>
+
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <streambuf>
 
 #include <stdio.h>
 #include <linux/types.h>
@@ -30,6 +36,7 @@
 
 #include "qcustomplot.h"
 #include "serial.h"
+#include "cam.h"
 
 #define RES_POS "/mnt/mdmedical1/mdmedical/res/Background/"
 //#define RES_POS "/mnt/mdmedical1/mdmedical/res/Background/"
@@ -49,7 +56,7 @@
 typedef struct CCurrentInfo
 {
      int cureCycle = 0;
-     int targetTmp = 0;
+     int targetTmp = 50;
      int maxPower = 0;
      int curePos = 0;
      int chanel = 1;
@@ -74,6 +81,7 @@ public:
     void InitTargetTempSubWidgets();
     void InitMaxPowerSubWidgets();
     void InitCurePosSubWidgets();
+    void ShowLeftCureTime();
 
 private:
     QTimer *m_pQTimer_showtime;
@@ -83,27 +91,48 @@ private:
     QTimer *m_pQTimer_preparestatus;
     QTimer *m_pQTimer_detectkey;
     QTimer *m_pQTimer_detectcalibrate;
+    QTimer *m_pQTimer_showpowerrate1;
+    QTimer *m_pQTimer_showpowerrate2;
+    QTimer *m_pQTimer_showpowerrate3;
+    QTimer *m_pQTimer_showpowerrate4;
+    QTimer *m_pQTimer_showcam;
+    QTimer *m_pQTimer_writedata;
 
     QCustomPlot *widget;
     int closegraph;
     int setvalue;
+    float lasttmp1;
+    float lasttmp2;
+    float lasttmp3;
+    float lasttmp4;
     //CSerial selOperation;
     CCUREINFORMATION originalInfo;
-//    CSerial sel1;
-//    CSerial sel2;
-//    CSerial sel4;
-//    CSerial sel5;
+
+    QProgressBar *progressBar1;
+    QProgressBar *progressBar2;
+    QProgressBar *progressBar3;
+    QProgressBar *progressBar4;
+
     QComboBox  *m_QComboBox_cureperiod;
     QComboBox  *m_QComboBox_targettemp;
     QComboBox  *m_QComboBox_maxpower;
     QComboBox  *m_QComboBox_curepos;
 
     QLabel *m_QLabel_pic1;
+    QLabel *m_QLeftcureTime;
 
     QProcess *m_QProcess_calibration;
 
+    QString time;
+
     int m_plot_i;
     int m_calibate_count;
+    int limit_count;
+    int m_minute;
+    int m_second;
+    bool istakephoto;
+    bool isclosecam;
+    unsigned char *jpeg_buf = NULL;
 public slots:
     void ShowTimeCurrent(void);
     void makeGraph();
@@ -116,7 +145,6 @@ public slots:
     void ChangePrepareStatus();
 
 private slots:
-    void on_pushButton_footkey_clicked();
    void GetCureCycleCurrentValue();
    void GetTargetTmpCurrentValue();
    void GetMaxPowerCurrentValue();
@@ -127,8 +155,9 @@ private slots:
    void GetChanel4Value();
    void DetectKey();
    void DetectCalibrate();
-
-
+   void ShowPowerRate();
+   void ShowCam();
+   void WriteData();
 
 
 
@@ -136,8 +165,19 @@ private slots:
 
    void on_pushButton_calibrate_clicked();
 
+   void on_pushButton_showcam_clicked();
+
+   void on_pushButton_takephoto_clicked();
+
+   void on_pushButton_closecam_clicked();
+
 private:
     Ui::mdmedical *ui;
+
+    Opera_Cam ope;
+    QImage image;
+    ofstream oFile;
+
 };
 
 #endif // MDMEDICAL_H
