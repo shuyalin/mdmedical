@@ -16,11 +16,10 @@ int main(int argc, char *argv[])
     a.setFont(font);
 #endif
 //this is for github test
-
+    qInstallMessageHandler(customMessageHandler);
 //    w.setGeometry(QRect(30, 30, 720, 450));
     w.setWindowFlags(Qt::FramelessWindowHint);
     //w.setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint | Qt::WindowMinMaxButtonsHint);
     w.show();
-
     return a.exec();
 }

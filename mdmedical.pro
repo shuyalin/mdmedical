@@ -11,16 +11,23 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 TARGET = mdmedical
 TEMPLATE = app
 
+INCLUDEPATH += /home/root/mdworkdir/xlslib_arm/xlslib/tmp/include/ \
 
 SOURCES += main.cpp\
         mdmedical.cpp \
     qcustomplot.cpp \
     serial.cpp \
-    cam.cpp
+    cam.cpp \
+    managerdialog.cpp
 
 HEADERS  += mdmedical.h \
     qcustomplot.h \
     serial.h \
-    cam.h
+    cam.h \
+    managerdialog.h \
 
-FORMS    += mdmedical.ui
+
+FORMS    += mdmedical.ui \
+    managerdialog.ui
+
+LIBS += -L /home/root/mdworkdir/xlslib_arm/xlslib/tmp/lib/  -lxls

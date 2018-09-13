@@ -55,6 +55,7 @@ public:
     QPushButton *pushButton_showcam;
     QPushButton *pushButton_takephoto;
     QPushButton *pushButton_closecam;
+    QWidget *widget;
 
     void setupUi(QWidget *mdmedical)
     {
@@ -157,6 +158,9 @@ public:
         pushButton_closecam = new QPushButton(mdmedical);
         pushButton_closecam->setObjectName(QStringLiteral("pushButton_closecam"));
         pushButton_closecam->setGeometry(QRect(150, 140, 41, 21));
+        widget = new QWidget(mdmedical);
+        widget->setObjectName(QStringLiteral("widget"));
+        widget->setGeometry(QRect(20, 260, 31, 20));
 
         retranslateUi(mdmedical);
 

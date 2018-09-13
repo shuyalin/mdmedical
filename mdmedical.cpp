@@ -2,13 +2,14 @@
 #include "ui_mdmedical.h"
 
 
+
 bool port[4] = {false,false,false,false};
 
-float currTmp[8];
+float g_fCurrTmp[8];
 float showtmp[4];
 //bool isTmpFinished = false;
 //bool isShowFinished = false;
-int indexpower;
+int g_iIndexpower;
 
 bool g_bWaitCommand = false;
 
@@ -18,6 +19,8 @@ CSerial sel1;
 CSerial sel2;
 CSerial sel4;
 CSerial sel5;
+
+QFile outFile("log.txt");
 
 bool g_bPrerareMode = false;
 bool g_bIdleMode = false;
@@ -31,9 +34,16 @@ bool g_bPrepareKey = false;
 bool g_bFootKey = false;
 bool g_bFootKeyHide = false;
 bool m_bIsfootkeyPress;
-
+bool g_bisupdatestatus = true;
+bool g_bisfinishedupdate = false;
+bool g_bupdatestatus = false;
+bool g_bisUpdatesuccess = false;
 volatile bool g_bIsFinishiIncreasePower = true;
 volatile bool g_bIsfinishReadtempture = true;
+
+
+
+volatile bool channel_mask[4]={false,false,false,false};
 
 pthread_mutex_t g_mutex;
 
@@ -46,7 +56,7 @@ QVector<double> temp3(1200);  //nianmo Min
 
 
 
-static char powerindex[21][5]={"0.1","0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0","5.5","6.0","6.5","7.0","7.5","8.0","8.5","9.0","9.5","10.0"};
+const char powerindex[21][5]={"0.1","0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0","5.5","6.0","6.5","7.0","7.5","8.0","8.5","9.0","9.5","10.0"};
 
 
 float ReturnMaxValue(float a,float b,float c,float d)
@@ -76,6 +86,39 @@ float ReturnMinValue(float a,float b,float c,float d)
     return tmp;
 }
 
+
+float fliter(unsigned short *array)
+{
+    int i,j,sum=0;
+    unsigned short  tmpval;
+    unsigned short ret_array[32]={0};
+    int arrlay_en = 16;//sizeof(array)/sizeof(int);
+    for(i=0;i<arrlay_en-1;i++)
+    {
+        for(j=0;j<arrlay_en-1-i;j++)
+        {
+            if(array[j] >= array[j+1])
+            {
+                tmpval = array[j];
+                array[j] = array[j+1];
+                array[j+1] = tmpval;
+            }
+        }
+    }
+
+    for(i=0;i<arrlay_en;i++)
+    {
+        ret_array[i] = array[i];
+    }
+
+    for (i=5;i<13;i++)
+    {
+        sum += ret_array[i];
+    }
+    //printf("dddd %d\n",sum/16);
+    return ((float)(sum)*124.7/8/4096);
+}
+
 /*
 void *SendSerialFun(void *args)
 {
@@ -87,50 +130,61 @@ void *SendSerialFun(void *args)
 bool Idle_send()
 {
     bool ok1 = false,ok2 = false,ok3 = false,ok4 = false;
-    sel1.IdleSend(0);
-    sel1.SendData();
-    sel1.RecvData();
-    ok1 = sel1.ParseIdleSendReturnData();
+    if(!channel_mask[0])
+    {
+        sel1.IdleSend(0);
+        sel1.SendData();
+        sel1.RecvData();
+        ok1 = sel1.ParseIdleSendReturnData();
+    }
 
-    sel2.IdleSend(0);
-    sel2.SendData();
-    sel2.RecvData();
-    ok2 = sel2.ParsePrepareSendReturnData();
+    if(!channel_mask[1])
+    {
+        sel2.IdleSend(0);
+        sel2.SendData();
+        sel2.RecvData();
+        ok2 = sel2.ParsePrepareSendReturnData();
+    }
 
-    sel4.IdleSend(0);
-    sel4.SendData();
-    sel4.RecvData();
-    ok3 = sel4.ParsePrepareSendReturnData();
+    if(!channel_mask[2])
+    {
+        sel4.IdleSend(0);
+        sel4.SendData();
+        sel4.RecvData();
+        ok3 = sel4.ParsePrepareSendReturnData();
+    }
 
-    sel5.IdleSend(0);
-    sel5.SendData();
-    sel5.RecvData();
-    ok4 = sel5.ParsePrepareSendReturnData();
+    if(!channel_mask[3])
+    {
+        sel5.IdleSend(0);
+        sel5.SendData();
+        sel5.RecvData();
+        ok4 = sel5.ParsePrepareSendReturnData();
+    }
 
-    return (ok1&&ok2&&ok3&&ok4);
+    return (ok1||ok2||ok3||ok4);
 }
 
 bool cure_send()
 {
-    while(!g_bIsFinishiIncreasePower)
-        usleep(10*1000);
+
     bool ok1=false,ok2=false,ok3=false,ok4=false;
-    sel1.CureComand(powerindex[indexpower],3);//治疗模式，发送最大功率
+    sel1.CureComand(powerindex[g_iIndexpower],3);//治疗模式，发送最大功率
     sel1.SendData();
     sel1.RecvData();
     ok1 = sel1.ParseCureSendReturnData();
 
-    sel2.CureComand(powerindex[indexpower],3);
+    sel2.CureComand(powerindex[g_iIndexpower],3);
     sel2.SendData();
     sel2.RecvData();
     ok2 = sel2.ParseCureSendReturnData();
 
-    sel4.CureComand(powerindex[indexpower],3);
+    sel4.CureComand(powerindex[g_iIndexpower],3);
     sel4.SendData();
     sel4.RecvData();
     ok3 = sel4.ParseCureSendReturnData();
 
-    sel5.CureComand(powerindex[indexpower],3);
+    sel5.CureComand(powerindex[g_iIndexpower],3);
     sel5.SendData();
     sel5.RecvData();
     ok4 = sel5.ParseCureSendReturnData();
@@ -142,109 +196,174 @@ void Prepare_send()
 {
     //float f;
     //float f1;
-    sel1.PrepareSend(0);
-    sel1.SendData();
-    sel1.RecvData();
-    sel1.ParsePrepareSendReturnData();
-    impedance[0] = sel1.impence;
+    if(!channel_mask[0])
+    {
+        sel1.PrepareSend(0);
+        sel1.SendData();
+        sel1.RecvData();
+        sel1.ParsePrepareSendReturnData();
+        impedance[0] = sel1.impence;
+        sel1.PowerSend(0);
+        sel1.SendData();
+        sel1.RecvData();
+        sel1.ParsePowerSendReturnData();
+    }
 #if 0
     if(m_bIsfootkeyPress)
     {
         f = (float)(sel1.powerrate[0]-0x30) + ((float)(sel1.powerrate[2]-0x30)/10);
-        f1 = atof(powerindex[indexpower]);
+        f1 = atof(powerindex[g_iIndexpower]);
         //printf("  the powerrate is    %.1f    ",f);
     }
 #endif
-    sel2.PrepareSend(0);
-    sel2.SendData();
-    sel2.RecvData();
-    sel2.ParsePrepareSendReturnData();
-    impedance[1] = sel2.impence;
+
+    if(!channel_mask[1])
+    {
+        sel2.PrepareSend(0);
+        sel2.SendData();
+        sel2.RecvData();
+        sel2.ParsePrepareSendReturnData();
+        impedance[1] = sel2.impence;
+        sel2.PowerSend(0);
+        sel2.SendData();
+        sel2.RecvData();
+        sel2.ParsePowerSendReturnData();
+    }
     #if 0
     if(m_bIsfootkeyPress)
     {
         f = (float)(sel2.powerrate[0]-0x30) + ((float)(sel2.powerrate[2]-0x30)/10);
-        f1 = atof(powerindex[indexpower]);
+        f1 = atof(powerindex[g_iIndexpower]);
         //printf("     %.1f    ",f);
     }
     #endif
-    sel4.PrepareSend(0);
-    sel4.SendData();
-    sel4.RecvData();
-    sel4.ParsePrepareSendReturnData();
-    impedance[2] = sel4.impence;
+
+    if(!channel_mask[2])
+    {
+        sel4.PrepareSend(0);
+        sel4.SendData();
+        sel4.RecvData();
+        sel4.ParsePrepareSendReturnData();
+        impedance[2] = sel4.impence;
+
+        sel4.PowerSend(0);
+        sel4.SendData();
+        sel4.RecvData();
+        sel4.ParsePowerSendReturnData();
+    }
     #if 0
     if(m_bIsfootkeyPress)
     {
         f = (float)(sel4.powerrate[0]-0x30) + ((float)(sel4.powerrate[2]-0x30)/10);
-        f1 = atof(powerindex[indexpower]);
+        f1 = atof(powerindex[g_iIndexpower]);
         //printf("     %.1f    ",f);
     }
     #endif
-    sel5.PrepareSend(0);
-    sel5.SendData();
-    sel5.RecvData();
-    sel5.ParsePrepareSendReturnData();
-    impedance[3] = sel5.impence;
+
+    if(!channel_mask[3])
+    {
+        sel5.PrepareSend(0);
+        sel5.SendData();
+        sel5.RecvData();
+        sel5.ParsePrepareSendReturnData();
+        impedance[3] = sel5.impence;
+
+        sel5.PowerSend(0);
+        sel5.SendData();
+        sel5.RecvData();
+        sel5.ParsePowerSendReturnData();
+    }
      #if 0
     if(m_bIsfootkeyPress)
     {
         f = (float)(sel5.powerrate[0]-0x30) + ((float)(sel5.powerrate[2]-0x30)/10);
-        f1 = atof(powerindex[indexpower]);
+        f1 = atof(powerindex[g_iIndexpower]);
         //printf("     %.1f     \n",f);
     }
     #endif
 }
+
+
 /*发送命令给串口减小功率*/
 bool pwmd_send()
 {
     while(!g_bIsFinishiIncreasePower)
         usleep(10*1000);
     bool ok1=false,ok2=false,ok3=false,ok4=false;
-    if(port[0])
+    if(!channel_mask[0])
     {
-        sel1.PwmdSend(0);
-        sel1.SendData();
-    }
-    if(port[1])
-    {
-        sel2.PwmdSend(0);
-        sel2.SendData();
-    }
-    if(port[2])
-    {
-        sel4.PwmdSend(0);
-        sel4.SendData();
-    }
-    if(port[3])
-    {
-        sel5.PwmdSend(0);
-        sel5.SendData();
+        if(port[0])
+        {
+            sel1.PwmdSend(0);
+            sel1.SendData();
+        }
     }
 
-    if(port[0])
+    if(!channel_mask[1])
     {
-        port[0] = true;
-        sel1.RecvData();
-        ok1 = sel1.ParseIdleSendReturnData();
+        if(port[1])
+        {
+            sel2.PwmdSend(0);
+            sel2.SendData();
+        }
     }
-    if(port[1])
+
+    if(!channel_mask[2])
     {
-        port[1] = true;
-        sel2.RecvData();
-        ok2 = sel2.ParseIdleSendReturnData();
+        if(port[2])
+        {
+            sel4.PwmdSend(0);
+            sel4.SendData();
+        }
     }
-    if(port[2])
+
+    if(!channel_mask[3])
     {
-        port[2] = true;
-        sel4.RecvData();
-        ok3 = sel4.ParseIdleSendReturnData();
+        if(port[3])
+        {
+            sel5.PwmdSend(0);
+            sel5.SendData();
+        }
     }
-    if(port[3])
+
+    if(!channel_mask[0])
     {
-        port[3] = true;
-        sel5.RecvData();
-        ok4 = sel5.ParseIdleSendReturnData();
+        if(port[0])
+        {
+            port[0] = true;
+            sel1.RecvData();
+            ok1 = sel1.ParseIdleSendReturnData();
+        }
+    }
+
+    if(!channel_mask[1])
+    {
+        if(port[1])
+        {
+            port[1] = true;
+            sel2.RecvData();
+            ok2 = sel2.ParseIdleSendReturnData();
+        }
+    }
+
+    if(!channel_mask[2])
+    {
+        if(port[2])
+        {
+            port[2] = true;
+            sel4.RecvData();
+            ok3 = sel4.ParseIdleSendReturnData();
+        }
+    }
+
+    if(!channel_mask[3])
+    {
+        if(port[3])
+        {
+            port[3] = true;
+            sel5.RecvData();
+            ok4 = sel5.ParseIdleSendReturnData();
+        }
     }
 
     return (ok1&&ok2&&ok3&&ok4);
@@ -254,52 +373,80 @@ bool pwmi_send()
 {
 
     bool ok1=false,ok2=false,ok3=false,ok4=false;
-
-    if(port[0])
+    if(!channel_mask[0])
     {
-        sel1.PwmiSend(0);
-        sel1.SendData();
-    }
-    if(port[1])
-    {
-        sel2.PwmiSend(0);
-        sel2.SendData();
-    }
-    if(port[2])
-    {
-        sel4.PwmiSend(0);
-        sel4.SendData();
-    }
-    if(port[3])
-    {
-        sel5.PwmiSend(0);
-        sel5.SendData();
+        if(port[0])
+        {
+            sel1.PwmiSend(0);
+            sel1.SendData();
+        }
     }
 
-    if(port[0])
+    if(!channel_mask[1])
     {
-        port[0] = false;
-        sel1.RecvData();
-        ok1 = sel1.ParseIdleSendReturnData();
+        if(port[1])
+        {
+            sel2.PwmiSend(0);
+            sel2.SendData();
+        }
     }
 
-    if(port[1])
+    if(!channel_mask[2])
     {
-        port[1] = false;
-        sel2.RecvData();
-        ok2 = sel2.ParseIdleSendReturnData();
+        if(port[2])
+        {
+            sel4.PwmiSend(0);
+            sel4.SendData();
+        }
     }
-    if(port[2])
+
+    if(!channel_mask[3])
     {
-        port[2] = false;
-        sel4.RecvData();
-        ok3 = sel4.ParseIdleSendReturnData();
+        if(port[3])
+        {
+            sel5.PwmiSend(0);
+            sel5.SendData();
+        }
     }
-    if(port[3])
+
+    if(!channel_mask[0])
     {
-        port[3] = false;
-        sel5.RecvData();
-        ok4 = sel5.ParseIdleSendReturnData();
+        if(port[0])
+        {
+            port[0] = false;
+            sel1.RecvData();
+            ok1 = sel1.ParseIdleSendReturnData();
+        }
+    }
+
+    if(!channel_mask[1])
+    {
+        if(port[1])
+        {
+            port[1] = false;
+            sel2.RecvData();
+            ok2 = sel2.ParseIdleSendReturnData();
+        }
+    }
+
+    if(!channel_mask[2])
+    {
+        if(port[2])
+        {
+            port[2] = false;
+            sel4.RecvData();
+            ok3 = sel4.ParseIdleSendReturnData();
+        }
+    }
+
+    if(!channel_mask[3])
+    {
+        if(port[3])
+        {
+            port[3] = false;
+            sel5.RecvData();
+            ok4 = sel5.ParseIdleSendReturnData();
+        }
     }
 
     return (ok1&&ok2&&ok3&&ok4);
@@ -308,50 +455,81 @@ bool pwmi_send()
 bool pwmkeep_send()
 {
     bool ok1=false,ok2=false,ok3=false,ok4=false;
-    if(port[0])
+
+    if(!channel_mask[0])
     {
-        sel1.PwmKeepSend(0);
-        sel1.SendData();
-    }
-    if(port[1])
-    {
-        sel2.PwmKeepSend(0);
-        sel2.SendData();
-    }
-    if(port[2])
-    {
-        sel4.PwmKeepSend(0);
-        sel4.SendData();
-    }
-    if(port[3])
-    {
-        sel5.PwmKeepSend(0);
-        sel5.SendData();
+        if(port[0])
+        {
+            sel1.PwmKeepSend(0);
+            sel1.SendData();
+        }
     }
 
-    if(port[0])
+    if(!channel_mask[1])
     {
-        port[0] = false;
-        sel1.RecvData();
-        ok1 = sel1.ParseIdleSendReturnData();
+        if(port[1])
+        {
+            sel2.PwmKeepSend(0);
+            sel2.SendData();
+        }
     }
-    if(port[1])
+
+    if(!channel_mask[2])
     {
-        port[1] = false;
-        sel2.RecvData();
-        ok2 = sel2.ParseIdleSendReturnData();
+        if(port[2])
+        {
+            sel4.PwmKeepSend(0);
+            sel4.SendData();
+        }
     }
-    if(port[2])
+
+    if(!channel_mask[3])
     {
-        port[2] = false;
-        sel4.RecvData();
-        ok3 = sel4.ParseIdleSendReturnData();
+        if(port[3])
+        {
+            sel5.PwmKeepSend(0);
+            sel5.SendData();
+        }
     }
-    if(port[3])
+
+    if(!channel_mask[0])
     {
-        port[3] = false;
-        sel5.RecvData();
-        ok4 = sel5.ParseIdleSendReturnData();
+        if(port[0])
+        {
+            port[0] = false;
+            sel1.RecvData();
+            ok1 = sel1.ParseIdleSendReturnData();
+        }
+    }
+
+    if(!channel_mask[1])
+    {
+        if(port[1])
+        {
+            port[1] = false;
+            sel2.RecvData();
+            ok2 = sel2.ParseIdleSendReturnData();
+        }
+    }
+
+    if(!channel_mask[2])
+    {
+        if(port[2])
+        {
+            port[2] = false;
+            sel4.RecvData();
+            ok3 = sel4.ParseIdleSendReturnData();
+        }
+    }
+
+    if(!channel_mask[3])
+    {
+        if(port[3])
+        {
+            port[3] = false;
+            sel5.RecvData();
+            ok4 = sel5.ParseIdleSendReturnData();
+        }
     }
 
     return (ok1&&ok2&&ok3&&ok4);
@@ -360,25 +538,39 @@ bool pwmkeep_send()
 bool cure_close()
 {
     bool ok1=false,ok2=false,ok3=false,ok4=false;
-    sel1.CureClosed(0);
-    sel1.SendData();
-    sel1.RecvData();
-    ok1 = sel1.ParseIdleSendReturnData();
 
-    sel2.CureClosed(0);
-    sel2.SendData();
-    sel2.RecvData();
-    ok2 = sel2.ParseIdleSendReturnData();
+    if(!channel_mask[0])
+    {
+        sel1.CureClosed(0);
+        sel1.SendData();
+        sel1.RecvData();
+        ok1 = sel1.ParseIdleSendReturnData();
+    }
 
-    sel4.CureClosed(0);
-    sel4.SendData();
-    sel4.RecvData();
-    ok3 = sel4.ParseIdleSendReturnData();
+    if(!channel_mask[1])
+    {
+        sel2.CureClosed(0);
+        sel2.SendData();
+        sel2.RecvData();
+        ok2 = sel2.ParseIdleSendReturnData();
+    }
 
-    sel5.CureClosed(0);
-    sel5.SendData();
-    sel5.RecvData();
-    ok4 = sel5.ParseIdleSendReturnData();
+
+    if(!channel_mask[2])
+    {
+        sel4.CureClosed(0);
+        sel4.SendData();
+        sel4.RecvData();
+        ok3 = sel4.ParseIdleSendReturnData();
+    }
+
+    if(!channel_mask[3])
+    {
+        sel5.CureClosed(0);
+        sel5.SendData();
+        sel5.RecvData();
+        ok4 = sel5.ParseIdleSendReturnData();
+    }
 
     return (ok1&&ok2&&ok3&&ok4);
 }
@@ -386,71 +578,76 @@ bool cure_close()
 
 void *GetCurrTmp(void *args)
 {
-        unsigned short tmp,count = 0;
-        unsigned int sum_tmp = 0,i;
-        float currTmp1[8];
-        float currTmp2[8];
-
-        sel1.openSerial(SERIAL1,115200);
-        sel2.openSerial(SERIAL2,115200);
-        sel4.openSerial(SERIAL4,115200);
-        sel5.openSerial(SERIAL5,115200);
+        unsigned int i;
+        unsigned short currTmp1[32]={0};
+        unsigned short currTmp2[32]={0};
+        float tmp1[8]={0},tmp2[8]={0};
+        struct timeval start,end;
 
         int fd = open("/dev/mdmedical_tmp", O_RDWR);
         if(fd < 0)
         {
             printf("open device failed!\n");
         }
+
         usleep(2*1000);
         while(1)
         {
+                    gettimeofday(&start,NULL);
                     for(i=3;i<11;i++)
                     {
+
+                        if(channel_mask[(i-3)/2])
+                            continue;
+
                         ioctl(fd,i,12);
-                        usleep(2*1000);
-                        while(count < 16)
-                        {
-                            read(fd,&tmp,2);
-//                            if(tmp > 3000)
-//                                printf("SS %hu",tmp);
-                            count++;
-                            sum_tmp += tmp;
-                        }
 
-                        currTmp1[i-3] = (float)((sum_tmp)*120.0/16/4096);//(currTmptmp[i-3] + currTmptmplast[i-3])/2;
-                        count = 0;
-                        sum_tmp = 0;
+                        read(fd,currTmp1,32);
+                        tmp1[i-3] = fliter(currTmp1);
+//                        for(k=0;k<16;k++)
+//                            printf(" %hu ",currTmp1[k]);
+//                            printf("\n");
+
                     }
+                     //printf("\n"); printf("\n"); printf("\n");
+                    gettimeofday(&end,NULL);
+                    usleep(10*1000-(end.tv_sec*1000000+end.tv_usec-start.tv_usec-start.tv_sec*1000000));
+                   //printf("chazhi is %d\n",end.tv_usec-start.tv_usec);
 
-                    usleep(10*1000);
 #if 1
                     for(i=3;i<11;i++)
                     {
-                        ioctl(fd,i,12);
-                        usleep(2*1000);
-                        while(count < 16)
-                        {
-                            read(fd,&tmp,2);
-                            count++;
-                            sum_tmp += tmp;
-                        }
+                        if(channel_mask[(i-3)/2])
+                            continue;
 
-                        currTmp2[i-3] = (float)((sum_tmp)*120.0/16/4096);//(currTmptmp[i-3] + currTmptmplast[i-3])/2;
-                        count = 0;
-                        sum_tmp = 0;
+                        ioctl(fd,i,12);
+
+                        read(fd,&currTmp2,32);
+                        tmp2[i-3] = fliter(currTmp2);
+
+//                        for(k=0;k<16;k++)
+//                            printf(" %hu ",currTmp1[k]);
+//                            printf("\n");
+
                     }
+                    //printf("\n");printf("\n");printf("*********************************************************************88\n");
 #endif
 
                     g_bIsFinishiIncreasePower = true;
                     for(int j=0;j<8;j++)
                     {
-                        currTmp[j] = (currTmp1[j] + currTmp2[j])/2;
-                        if(currTmp[j]>80)
-                            printf(" %.1f \n ",currTmp[j]);
+                        g_fCurrTmp[j] = (tmp1[j] + tmp2[j])/2;
+                        //g_fCurrTmp[j] = tmp1[j];
+                        //if(g_fCurrTmp[j]>80)
+                          //printf(" channel  %d   %.1f   %lf  %lf\n ",j,tmp1[j],tmp2[j],g_fCurrTmp[j]);
                     }
-                    //usleep(300*1000);
 
-
+ /************************************以上读温度************************************************/
+                    usleep(300*1000);
+ /************************************以下发送串口命令************************************************/
+#if 1
+                    if(!g_bupdatestatus)
+                    {
                 #if 1
                         if(g_bPrerareMode && g_bWaitCommand)
                         {
@@ -499,7 +696,7 @@ void *GetCurrTmp(void *args)
                 #if 1
                         if(g_bPwmkeepMode)
                         {
-                            printf("PWM----KKKKKKKKKKKKKKKKK  %f\n",currTmp[3]);
+                            printf("PWM----KKKKKKKKKKKKKKKKK  %f\n",g_fCurrTmp[3]);
                             pwmkeep_send();
                             g_bPwmkeepMode = false;
                         }
@@ -509,7 +706,8 @@ void *GetCurrTmp(void *args)
                             g_bCureClosed = false;
                         }
                 #endif
-                        //usleep(400*1000);
+                    }
+  #endif                      //usleep(400*1000);
         }
 }
 /*检测按键按下，/dev/mdmedical_buttons为按键的驱动程序的设备节点，驱动采用中断方式检测按键是否按下*/
@@ -535,13 +733,143 @@ void *detect_key_func(void *args)
         //printf("key_val = 0x%x\n", key_val);
     }
 }
+char g_version[14];
+int g_updateprocess;
+bool g_bStartProcessBar = false;
+void *update_firmware(void *args)
+{
 
+       bool ok1=false,ok2=false,ok3=false,ok4=false;
+        const char *filename = "../USMART.bin";
+        int filelen;
+
+        filelen = sel1.Get_File_Size(filename);
+        if(filelen == -1)
+            printf("get file size failed!\n");
+            //return ;
+        printf("file size is = %d\n",filelen);
+
+        g_updateprocess = filelen / 1024 * 4 + 12;
+        g_bStartProcessBar = true;
+        unsigned char *buff;
+        buff = (unsigned char*)malloc(sizeof(unsigned char)*filelen);
+        if(buff == NULL)
+        {
+            printf("malloc memory failed!\n");
+            //return ;
+        }
+
+        if(sel1.Read_File(filename,buff,filelen) < 0)
+        {
+            printf("there is something wrong with reading data from the file!\n");
+            //return ;
+        }
+        sel1.UpdateSend(0);
+        sel1.SendData();
+        sel1.RecvData();
+        if(sel1.ParseUpdateSendReturnData())
+        {
+            printf("eeeeeeeeeeeeeeeeee\n");
+            usleep(30*1000);
+            sel1.Send_Byte(0x31);
+            sel1.BreakForTransFile();
+            if(sel1.Ymodem_Transmit(buff, (const unsigned char *)filename, filelen) == 0)
+            {
+                sel1.Send_Byte(0x33);
+                printf("update success!\n");
+                ok1 = true;
+            }
+            //sel1.GetVersionNumber();
+          }
+
+        sel2.UpdateSend(0);
+        sel2.SendData();
+        sel2.RecvData();
+        if(sel2.ParseUpdateSendReturnData())
+        {
+            usleep(30*1000);
+            sel2.Send_Byte(0x31);
+            sel2.BreakForTransFile();
+            if(sel2.Ymodem_Transmit(buff, (const unsigned char *)filename, filelen) == 0)
+            {
+                sel2.Send_Byte(0x33);
+                printf("update success!\n");
+                ok2 = true;
+            }
+           // sel2.GetVersionNumber();
+         }
+
+        sel4.UpdateSend(0);
+        sel4.SendData();
+        sel4.RecvData();
+        if(sel4.ParseUpdateSendReturnData())
+        {
+             usleep(30*1000);
+            sel4.Send_Byte(0x31);
+            sel4.BreakForTransFile();
+            if(sel4.Ymodem_Transmit(buff, (const unsigned char *)filename, filelen) == 0)
+            {
+                sel4.Send_Byte(0x33);
+                printf("update success!\n");
+                ok3 = true;
+            }
+            //sel4.GetVersionNumber();
+        }
+
+
+        sel5.UpdateSend(0);
+        sel5.SendData();
+        sel5.RecvData();
+        if(sel5.ParseUpdateSendReturnData())
+        {
+            usleep(30*1000);
+            sel5.Send_Byte(0x31);
+            sel5.BreakForTransFile();
+            if(sel5.Ymodem_Transmit(buff, (const unsigned char *)filename, filelen) == 0)
+            {
+                sel5.Send_Byte(0x33);
+                printf("update success!\n");
+                ok4 = true;
+            }
+            sel5.GetVersionNumber(g_version);
+        }
+        printf("g_version = %s\n",g_version);
+        if(ok1 && ok2 && ok3 && ok4)
+            g_bisUpdatesuccess = true;
+        free(buff);
+        g_bisupdatestatus = true;
+}
 
 mdmedical::mdmedical(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::mdmedical)
 {
-    ui->setupUi(this);
+        ui->setupUi(this);
+
+        limit_count = 0;
+        closegraph = 0;
+        m_calibate_count = 0;
+        lasttmp1 = 0.0;
+        lasttmp2 = 0.0;
+        lasttmp3 = 0.0;
+        lasttmp4 = 0.0;
+
+        m_minute = 1;
+        m_second = 0;
+        m_bIsfootkeyPress = false;
+
+        col = 0;
+        row = 0;
+        isclosecam = false;
+        istakephoto = false;
+        m_bIsExistFirmware = false;
+
+        if(outFile.size()>LOG_MAXSIZE)
+                outFile.remove();
+
+
+
+        outFile.open(QIODevice::WriteOnly | QIODevice::Append);
 
         widget = new QCustomPlot(this);
         widget->setGeometry(10,380,600,300);
@@ -587,22 +915,21 @@ mdmedical::mdmedical(QWidget *parent) :
         axisRectGradient.setColorAt(1, QColor(30, 30, 30));
         widget->axisRect()->setBackground(axisRectGradient);
 
-        limit_count = 0;
-        closegraph = 0;
-        m_calibate_count = 0;
-        lasttmp1 = 0.0;
-        lasttmp2 = 0.0;
-        lasttmp3 = 0.0;
-        lasttmp4 = 0.0;
 
-        m_minute = 1;
-        m_second = 0;
-        m_bIsfootkeyPress = false;
+        mymanagerdialog = new Ui_ManagerDialog();
+        managerdialog = new QDialog(this);// superFactoryMode;
+        mymanagerdialog->setupUi(managerdialog);
 
-        isclosecam = false;
-        istakephoto = false;
 
         pthread_mutex_init(&g_mutex, NULL);
+
+
+
+      sel1.openSerial(SERIAL1,115200);
+      sel2.openSerial(SERIAL2,115200);
+      sel4.openSerial(SERIAL4,115200);
+      sel5.openSerial(SERIAL5,115200);
+
 
         m_QProcess_calibration = new QProcess();
 
@@ -624,6 +951,10 @@ mdmedical::mdmedical(QWidget *parent) :
 
         m_pQTimer_writedata = new QTimer(this);
 
+        m_pShowUpdateFinished = new QTimer(this);
+
+        m_pRecordTempture  = new QTimer(this);
+
          m_QComboBox_cureperiod = new QComboBox(this);
          InitCureReriodSubWidgets();
          m_QComboBox_targettemp = new QComboBox(this);
@@ -640,6 +971,12 @@ mdmedical::mdmedical(QWidget *parent) :
          progressBar2 = new QProgressBar(this);
          progressBar3 = new QProgressBar(this);
          progressBar4 = new QProgressBar(this);
+
+
+         connect(mymanagerdialog->pushButton_ts,SIGNAL(clicked()),this,SLOT(TsModify()));
+         connect(mymanagerdialog->pushButton_updata,SIGNAL(clicked()),this,SLOT(Updata()));
+         connect(mymanagerdialog->pushButton_copy,SIGNAL(clicked()),this,SLOT(CopyUserData()));
+         connect(mymanagerdialog->pushButton_exit,SIGNAL(clicked()),this,SLOT(ExitManagerPage()));
 
 
 
@@ -659,6 +996,10 @@ mdmedical::mdmedical(QWidget *parent) :
         connect(m_pQTimer_showcam, SIGNAL(timeout()), this, SLOT(ShowCam()));
 
         connect(m_pQTimer_writedata, SIGNAL(timeout()), this, SLOT(WriteData()));
+        connect(m_pShowUpdateFinished, SIGNAL(timeout()), this, SLOT(ShowUpdateStr()));
+
+        connect(m_pRecordTempture, SIGNAL(timeout()), this, SLOT(RecordTempture()));
+
         connect(ui->pushButton_td1,SIGNAL(clicked()),this,SLOT(GetChanel1Value()));
         connect(ui->pushButton_td2,SIGNAL(clicked()),this,SLOT(GetChanel2Value()));
         connect(ui->pushButton_td3,SIGNAL(clicked()),this,SLOT(GetChanel3Value()));
@@ -676,13 +1017,13 @@ mdmedical::mdmedical(QWidget *parent) :
         ui->label_showcurtime->setText("");
 
         ui->label_tmp1->setGeometry(280,100,65,20);  //chanel   1
-        ui->label_tmp2->setGeometry(454,278,65,20);  //chanel   1  nianmo
-        ui->label_tmp3->setGeometry(280,460,65,20);
-        ui->label_tmp4->setGeometry(100,267,65,20);
+        ui->label_tmp2->setGeometry(280,163,65,20);  //chanel   1  nianmo (454,278,65,20);
+        ui->label_tmp3->setGeometry(454,278,65,20);
+        ui->label_tmp4->setGeometry(400,267,65,20);
 
-        ui->label_tmp5->setGeometry(280,163,65,20);
-        ui->label_tmp6->setGeometry(400,267,65,20);
-        ui->label_tmp7->setGeometry(280,400,65,20);
+        ui->label_tmp5->setGeometry(280,400,65,20);
+        ui->label_tmp6->setGeometry(280,467,65,20);//400,267,65,20
+        ui->label_tmp7->setGeometry(100,265,65,20);//280,400,65,20
         ui->label_tmp8->setGeometry(155,278,65,20);
 
         ui->label_impedance1->setGeometry(280,130,45,20);
@@ -761,11 +1102,11 @@ mdmedical::mdmedical(QWidget *parent) :
         ui->pushButton_td4->setGeometry(680,255,40,20);
 
 
-        ui->pushButton_waitmode->setGeometry(800,650,100,30);
+        ui->pushButton_waitmode->setGeometry(900,150,100,30);
         ui->pushButton_waitmode->setText(QString::fromUtf8("待机模式"));
 
-        ui->pushButton_calibrate->setGeometry(800,600,100,30);
-        ui->pushButton_calibrate->setText(QString::fromUtf8("触摸屏校准"));
+        ui->pushButton_calibrate->setGeometry(900,100,100,30);
+        ui->pushButton_calibrate->setText(QString::fromUtf8("管理员模式"));
 
         ui->label_tagetTmp->setGeometry(680,75,100,20);
         ui->label_tagetTmp->setText(QString::fromUtf8("目标温度"));
@@ -881,10 +1222,14 @@ mdmedical::mdmedical(QWidget *parent) :
         progressBar4->setRange(0,100);
         progressBar4->setMinimumSize(0,100);
 
+
+
+
        progressBar1->setVisible(0);
        progressBar2->setVisible(0);
        progressBar3->setVisible(0);
        progressBar4->setVisible(0);
+
 
 
 
@@ -900,6 +1245,27 @@ mdmedical::mdmedical(QWidget *parent) :
        ui->pushButton_closecam->setGeometry(550,660,80,35);
        ui->pushButton_closecam->setText(QString::fromUtf8("关闭"));
 
+
+
+
+
+       ui->widget->setGeometry(700,500,324,268);
+       m_QPushButton_on_off = new QPushButton(ui->widget);
+       m_switch_up = new QPushButton(ui->widget);
+       m_switch_down = new QPushButton(ui->widget);
+       m_QLabel_streamspeed = new QLabel(ui->widget);
+
+       m_QPushButton_on_off->setText(QString::fromUtf8("开关"));
+       m_switch_up->setText(QString::fromUtf8("上调"));
+       m_switch_down->setText(QString::fromUtf8("下调"));
+       m_QLabel_streamspeed->setText(QString::fromUtf8("流速"));
+       m_QLabel_streamspeed->setGeometry(50,10,60,30);
+       m_QPushButton_on_off->setGeometry(10,100,60,30);
+       m_switch_up->setGeometry(80,100,60,30);
+       m_switch_down->setGeometry(150,100,60,30);
+
+        qDebug("This is a debug message");
+       //m_pRecordTempture->start(1000);
 
 #if 0
        QPixmap pixmap(QString::fromUtf8(RES_POS"step2.jpg"));//当前文件夹下面的图片
@@ -942,6 +1308,16 @@ mdmedical::mdmedical(QWidget *parent) :
         if(ret2 != 0)
         {
             printf("create detect_key_func pthread failed!\n");
+        }
+#endif
+
+#if 0
+        pthread_t tid_update;
+        int ret3 = pthread_create(&tid_update,NULL,update_firmware,NULL);
+        if(ret3 < 0)
+        {
+            printf("create pthread failed!\n");
+            return ;
         }
 #endif
 }
@@ -1224,40 +1600,137 @@ void mdmedical::ShowTimeCurrent(void)
 /*显示温度*/
 void mdmedical::ShowCurrentTmp(void)
 {
-    {
-        QString data1 = QString("%1").arg(currTmp[0]);
-        QString data2 = QString("%1").arg(currTmp[1]);
-        QString data3 = QString("%1").arg(currTmp[2]);
-        QString data4 = QString("%1").arg(currTmp[3]);
-        QString data5 = QString("%1").arg(currTmp[4]);
-        QString data6 = QString("%1").arg(currTmp[5]);
-        QString data7 = QString("%1").arg(currTmp[6]);
-        QString data8 = QString("%1").arg(currTmp[7]);
-        ui->label_tmp1->setText(data1.mid(0,4));
-        ui->label_tmp2->setText(data3.mid(0,4));
-        ui->label_tmp3->setText(data5.mid(0,4));
-        ui->label_tmp4->setText(data7.mid(0,4));
-        ui->label_tmp5->setText(data2.mid(0,4));
-        ui->label_tmp6->setText(data4.mid(0,4));
-        ui->label_tmp7->setText(data6.mid(0,4));
-        ui->label_tmp8->setText(data8.mid(0,4));
-    }
+        if(!channel_mask[0])
+        {
+            QString data1 = QString("%1").arg(g_fCurrTmp[0]);
+            QString data2 = QString("%1").arg(g_fCurrTmp[1]);
+            ui->label_tmp1->setText(data1.mid(0,4));
+            ui->label_tmp2->setText(data2.mid(0,4));
+        }
+        else
+        {
+            ui->label_tmp1->setText("");
+            ui->label_tmp2->setText("");
+        }
+        if(!channel_mask[1])
+        {
+            QString data3 = QString("%1").arg(g_fCurrTmp[2]);
+            QString data4 = QString("%1").arg(g_fCurrTmp[3]);
+            ui->label_tmp3->setText(data3.mid(0,4));
+            ui->label_tmp4->setText(data4.mid(0,4));
+        }
+        else
+        {
+            ui->label_tmp3->setText("");
+            ui->label_tmp4->setText("");
+        }
 
+        if(!channel_mask[2])
+        {
+            QString data5 = QString("%1").arg(g_fCurrTmp[4]);
+            QString data6 = QString("%1").arg(g_fCurrTmp[5]);
+            ui->label_tmp5->setText(data5.mid(0,4));
+            ui->label_tmp6->setText(data6.mid(0,4));
+        }
+        else
+        {
+            ui->label_tmp5->setText("");
+            ui->label_tmp6->setText("");
+        }
+        if(!channel_mask[3])
+        {
+            QString data7 = QString("%1").arg(g_fCurrTmp[6]);
+            QString data8 = QString("%1").arg(g_fCurrTmp[7]);
+            ui->label_tmp7->setText(data7.mid(0,4));
+            ui->label_tmp8->setText(data8.mid(0,4));
+        }
+        else
+        {
+            printf("gggggggggggggggggg\n");
+            ui->label_tmp7->setText("");
+            ui->label_tmp8->setText("");
+        }
 }
 
 /*显示阻抗*/
 void mdmedical::showCurrentImpedance(void)
 {
-    ui->label_impedance1->setText(QString::number(impedance[0],10));
-    ui->label_impedance2->setText(QString::number(impedance[1],10));
-    ui->label_impedance3->setText(QString::number(impedance[2],10));
-    ui->label_impedance4->setText(QString::number(impedance[3],10));
+    if(!channel_mask[0])
+        ui->label_impedance1->setText(QString::number(impedance[0],10));
+    else
+        ui->label_impedance1->setText("");
+
+    if(!channel_mask[1])
+        ui->label_impedance2->setText(QString::number(impedance[1],10));
+    else
+        ui->label_impedance2->setText("");
+
+    if(!channel_mask[2])
+        ui->label_impedance3->setText(QString::number(impedance[2],10));
+    else
+        ui->label_impedance3->setText("");
+
+    if(!channel_mask[3])
+        ui->label_impedance4->setText(QString::number(impedance[3],10));
+    else
+        ui->label_impedance4->setText("");
 
 }
 
 void mdmedical::ChangePrepareStatus()
 {
     g_bPrerareMode = true;
+}
+
+
+void mdmedical::TsModify()
+{
+    this->managerdialog->hide();
+    this->hide();  //隐藏主界面
+    m_pQTimer_detectcalibrate->start(1000);
+    m_calibate_count = 0;
+    if(m_QProcess_calibration->isOpen())
+        m_QProcess_calibration->close();
+    m_QProcess_calibration->start("ts_calibrate");
+
+}
+void mdmedical::Updata()
+{
+    printf("update firmware start!\n");
+    sel1.m_updateprocess = 0;
+    sel2.m_updateprocess = 0;
+    sel4.m_updateprocess = 0;
+    sel5.m_updateprocess = 0;
+
+
+
+
+    if(g_bisupdatestatus && m_bIsExistFirmware)
+    {
+        g_bisupdatestatus = false;
+        pthread_t tid_update;
+        int ret = pthread_create(&tid_update,NULL,update_firmware,NULL);
+        if(ret < 0)
+        {
+            printf("create pthread failed!\n");
+            return ;
+        }
+        m_pShowUpdateFinished->start(100);
+    }
+    else
+    {
+        QMessageBox::information(this,"error window",QString::fromUtf8("不可更新"));
+    }
+
+}
+void mdmedical::CopyData()
+{
+
+}
+void mdmedical::ExitManagerPage()
+{
+    g_bupdatestatus = false;
+    managerdialog->close();
 }
 
 /*治疗模式下绘制温度曲线图与控制功率的操作*/
@@ -1275,11 +1748,12 @@ void mdmedical::makeGraph()
     {
         if(m_pQTimer_showgraph->isActive())
             m_pQTimer_showgraph->stop();
-//        if(m_pQTimer_showpowerrate1->isActive())
-//            m_pQTimer_showpowerrate1->stop();
+        if(m_pQTimer_showpowerrate1->isActive())
+            m_pQTimer_showpowerrate1->stop();
         if(m_pQTimer_writedata->isActive())
             m_pQTimer_writedata->stop();
-        oFile.close();
+        wb.Dump(datafilename);
+        printf("xxxxxxxxxxxx%s\n",datafilename.c_str());
         progressBar1->setVisible(0);
         progressBar2->setVisible(0);
         progressBar3->setVisible(0);
@@ -1299,21 +1773,21 @@ void mdmedical::makeGraph()
 
 
 
-    temp[closegraph] = ReturnMaxValue(currTmp[0],currTmp[2],currTmp[4],currTmp[6]);
-    temp1[closegraph] = ReturnMinValue(currTmp[0],currTmp[2],currTmp[4],currTmp[6]);
-    temp2[closegraph] = ReturnMaxValue(currTmp[1],currTmp[3],currTmp[5],currTmp[7]);
-    temp3[closegraph] = ReturnMinValue(currTmp[1],currTmp[3],currTmp[5],currTmp[7]);
+    temp[closegraph] = ReturnMaxValue(g_fCurrTmp[0],g_fCurrTmp[2],g_fCurrTmp[4],g_fCurrTmp[6]);
+    temp1[closegraph] = ReturnMinValue(g_fCurrTmp[0],g_fCurrTmp[2],g_fCurrTmp[4],g_fCurrTmp[6]);
+    temp2[closegraph] = ReturnMaxValue(g_fCurrTmp[1],g_fCurrTmp[3],g_fCurrTmp[5],g_fCurrTmp[7]);
+    temp3[closegraph] = ReturnMinValue(g_fCurrTmp[1],g_fCurrTmp[3],g_fCurrTmp[5],g_fCurrTmp[7]);
 
     if(closegraph > 1)
     {
 #if 0
-        if(temp[closegraph] < originalInfo.targetTmp &&( (currTmp[0]-lasttmp1)<5.0 || (currTmp[2]-lasttmp2)<5.0 || (currTmp[4]-lasttmp3)<5.0 || (currTmp[6]-lasttmp4)<5.0 &&(limit_count<4)))
+        if(temp[closegraph] < originalInfo.targetTmp &&( (g_fCurrTmp[0]-lasttmp1)<5.0 || (g_fCurrTmp[2]-lasttmp2)<5.0 || (g_fCurrTmp[4]-lasttmp3)<5.0 || (g_fCurrTmp[6]-lasttmp4)<5.0 &&(limit_count<4)))
         {
             g_bPwmiMode = true;
             limit_count++;
             printf("PWM increase %d  %f\n",originalInfo.targetTmp,temp[closegraph]);
         }
-        else if(temp[closegraph] < originalInfo.targetTmp && ((currTmp[0]-lasttmp1)>5.0 || (currTmp[2]-lasttmp2)>5.0 || (currTmp[4]-lasttmp3)>5.0 || (currTmp[6]-lasttmp4)>5.0))
+        else if(temp[closegraph] < originalInfo.targetTmp && ((g_fCurrTmp[0]-lasttmp1)>5.0 || (g_fCurrTmp[2]-lasttmp2)>5.0 || (g_fCurrTmp[4]-lasttmp3)>5.0 || (g_fCurrTmp[6]-lasttmp4)>5.0))
         {
             g_bPwmdMode = true;
             printf("%d  %f\n",originalInfo.targetTmp,temp[closegraph]);
@@ -1327,7 +1801,7 @@ void mdmedical::makeGraph()
 
         for(i=0;i<4;i++)
         {
-            if(currTmp[i] < originalInfo.targetTmp/* &&( (currTmp[0]-lasttmp1)<5.0 || (currTmp[2]-lasttmp2)<5.0 || (currTmp[4]-lasttmp3)<5.0 || (currTmp[6]-lasttmp4)<5.0 &&(limit_count<4))*/)
+            if(g_fCurrTmp[i] < originalInfo.targetTmp/* &&( (currTmp[0]-lasttmp1)<5.0 || (currTmp[2]-lasttmp2)<5.0 || (currTmp[4]-lasttmp3)<5.0 || (currTmp[6]-lasttmp4)<5.0 &&(limit_count<4))*/)
             {
                 port[i] = true;
                 g_bPwmiMode = true;
@@ -1354,10 +1828,10 @@ void mdmedical::makeGraph()
 
 
 
-    lasttmp1 = currTmp[0];
-    lasttmp2 = currTmp[2];
-    lasttmp3 = currTmp[4];
-    lasttmp4 = currTmp[6];
+    lasttmp1 = g_fCurrTmp[0];
+    lasttmp2 = g_fCurrTmp[2];
+    lasttmp3 = g_fCurrTmp[4];
+    lasttmp4 = g_fCurrTmp[6];
 
     if(count%2 == 0)
     {
@@ -1451,14 +1925,14 @@ void mdmedical::HShowAllWidget()
 void mdmedical::ItemNewPosition()
 {
     ui->label_tmp1->setGeometry(470,10,45,20);
-    ui->label_tmp2->setGeometry(620,152,45,20);
-    ui->label_tmp3->setGeometry(470,250,45,20);
-    ui->label_tmp4->setGeometry(370,152,45,20);
+    ui->label_tmp2->setGeometry(470,73,45,20);  //(620,152,45,20);
+    ui->label_tmp7->setGeometry(320,140,45,20);
+    ui->label_tmp8->setGeometry(370,152,45,20);
 
-    ui->label_tmp5->setGeometry(470,73,45,20);
-    ui->label_tmp6->setGeometry(560,140,45,20);
-    ui->label_tmp7->setGeometry(470,310,45,20);
-    ui->label_tmp8->setGeometry(320,140,45,20);
+    ui->label_tmp5->setGeometry(470,250,45,20);
+    ui->label_tmp6->setGeometry(470,310,45,20); //560,140,45,20
+    ui->label_tmp4->setGeometry(560,140,45,20);
+    ui->label_tmp3->setGeometry(620,152,45,20);  //320,140,45,20
 
     ui->label_impedance1->setGeometry(470,40,45,20);
     ui->label_impedance2->setGeometry(560,165,45,20);
@@ -1475,15 +1949,15 @@ void mdmedical::ItemNewPosition()
 
 void mdmedical::OriginalPosition()
 {
-    ui->label_tmp1->setGeometry(280,100,45,20);
-    ui->label_tmp2->setGeometry(454,278,45,20);
-    ui->label_tmp3->setGeometry(280,400,45,20);
-    ui->label_tmp4->setGeometry(155,278,45,20);
+    ui->label_tmp1->setGeometry(280,100,65,20);  //chanel   1
+    ui->label_tmp2->setGeometry(280,163,65,20);  //chanel   1  nianmo (454,278,65,20);
+    ui->label_tmp3->setGeometry(454,278,65,20);
+    ui->label_tmp4->setGeometry(400,267,65,20);
 
-    ui->label_tmp5->setGeometry(280,163,45,20);
-    ui->label_tmp6->setGeometry(400,267,45,20);
-    ui->label_tmp7->setGeometry(280,460,45,20);
-    ui->label_tmp8->setGeometry(100,267,45,20);
+    ui->label_tmp5->setGeometry(280,400,65,20);
+    ui->label_tmp6->setGeometry(280,467,65,20);//400,267,65,20
+    ui->label_tmp7->setGeometry(100,265,65,20);//280,400,65,20
+    ui->label_tmp8->setGeometry(155,278,65,20);
 
     ui->label_impedance1->setGeometry(280,130,45,20);
     ui->label_impedance2->setGeometry(400,292,45,20);
@@ -1522,18 +1996,34 @@ void mdmedical::GetCurePosCurrentValue()
 void mdmedical::GetChanel1Value()
 {
     originalInfo.chanel = 1;
+    if(!channel_mask[0])
+        channel_mask[0] = true;
+    else
+        channel_mask[0] = false;
 }
 void mdmedical::GetChanel2Value()
 {
     originalInfo.chanel = 2;
+    if(!channel_mask[1])
+        channel_mask[1] = true;
+    else
+        channel_mask[1] = false;
 }
 void mdmedical::GetChanel3Value()
 {
     originalInfo.chanel = 3;
+    if(!channel_mask[2])
+        channel_mask[2] = true;
+    else
+        channel_mask[2] = false;
 }
 void mdmedical::GetChanel4Value()
 {
     originalInfo.chanel = 4;
+    if(!channel_mask[3])
+        channel_mask[3] = true;
+    else
+        channel_mask[3] = false;
 }
 
 
@@ -1574,11 +2064,10 @@ void mdmedical::DetectKey()
         m_pQTimer_showpowerrate1->start(1000);
         m_pQTimer_writedata->start(1000);
         ItemNewPosition();
-        indexpower = originalInfo.maxPower;
+        g_iIndexpower = originalInfo.maxPower;
 
         originalInfo.cureCycle = m_QComboBox_cureperiod->currentIndex();
         m_minute = originalInfo.cureCycle / 6 + 1;
-        printf("sssssssssss  %d\n",m_minute);
         m_second = originalInfo.cureCycle % 6 *10;
 
         m_bIsfootkeyPress = true;
@@ -1590,9 +2079,63 @@ void mdmedical::DetectKey()
         widget->setVisible(1);
         g_bFootKey = false;
 
-        //打开要输出的文件
-        oFile.open("scoresheet.csv", ios::out | ios::trunc);    // 这样就很容易的输出一个需要的excel 文件
-        oFile << "温度" << "," << "阻抗" << "," << "功率" << endl;
+        struct tm *t;
+        time_t tt;
+        char data[48] = {0};
+        time(&tt);
+        t = localtime(&tt);
+        sprintf(data,"%s%d%c%d%c%d%c%d%c%d%c%d%s","/home/scandata/",t->tm_year + 1900,'-', t->tm_mon + 1,'-', t->tm_mday,'-', t->tm_hour,'-', t->tm_min,'-', t->tm_sec,".xls");
+        printf("%s\n",data);
+        datafilename = data;
+
+        col = 0;
+        row = 2;
+        second = 1;
+        xf = wb.xformat();
+        ws = wb.sheet("sheet1");
+
+        string time = "时间 秒";
+            string label = "1st单位：阻抗欧姆";
+            string label1 = "1st单位：℃ 针尖";
+            string label2 = "1st单位：℃ 粘膜";
+
+            string channel1 = "通道1";
+            string channel2 = "通道2";
+            string channel3 = "通道3";
+            string channel4 = "通道4";
+
+
+            cell  = ws->label(0,1,label,xf);
+            ws->merge(0,1,0,4);
+            cell->halign(HALIGN_CENTER);   //单元格水平方向居中
+
+            cell  = ws->label(0,5,label1,xf);
+            ws->merge(0,5,0,8);
+            cell->halign(HALIGN_CENTER);   //单元格水平方向居中
+
+            cell  = ws->label(0,9,label2,xf);
+            ws->merge(0,9,0,12);
+            cell->halign(HALIGN_CENTER);   //单元格水平方向居中
+
+
+
+                ws->label(1,0,time,xf);
+
+                ws->label(1,1,channel1,xf);
+                ws->label(1,2,channel2,xf);
+                ws->label(1,3,channel3,xf);
+                ws->label(1,4,channel4,xf);
+
+                ws->label(1,5,channel1,xf);
+                ws->label(1,6,channel2,xf);
+                ws->label(1,7,channel3,xf);
+                ws->label(1,8,channel4,xf);
+
+                ws->label(1,9,channel1,xf);
+                ws->label(1,10,channel2,xf);
+                ws->label(1,11,channel3,xf);
+                ws->label(1,12,channel4,xf);
+
 
     }
     else if(g_bFootKey && m_pQTimer_showgraph->isActive())
@@ -1601,21 +2144,48 @@ void mdmedical::DetectKey()
         g_bFootKey = false;
 
         m_pQTimer_writedata->stop();
-        oFile.close();
+        wb.Dump(datafilename);
     }
 }
-
+char version[64];
 /*触摸屏校验按钮按下超过五次，就触发触摸屏校验程序*/
 void mdmedical::on_pushButton_calibrate_clicked()
 {
     if((m_calibate_count++) > 5)
     {
-        this->hide();  //隐藏主界面
-        m_pQTimer_detectcalibrate->start(1000);
+        FILE *pfile = fopen("./res/file/version.txt", "r+");
+        if (!pfile)
+        {
+            printf("cannot open txt result file\n");
+            return;
+        }
+        fscanf(pfile,"%s",version);
+        fclose(pfile);;
+
+        g_bupdatestatus = true;
+        if(SearchFirmwareName("/udisk","USMART.bin"))
+        {
+            if(CopyFile("/udisk/USMART.bin","/mnt/USMART.bin"))
+            {
+                m_bIsExistFirmware = true;
+            }
+            else
+            {
+                m_bIsExistFirmware = false;
+            }
+        }
+        else
+        {
+                m_bIsExistFirmware = false;
+        }
+        mymanagerdialog->updateProgressBar->setValue(0);
+        //string str =  version;
         m_calibate_count = 0;
-        if(m_QProcess_calibration->isOpen())
-            m_QProcess_calibration->close();
-        m_QProcess_calibration->start("ts_calibrate");
+        mymanagerdialog->label->setText(version);
+        managerdialog->setWindowTitle("管理员模式");
+        managerdialog->setModal(true);
+        managerdialog->setWindowFlags(Qt::Window);
+        managerdialog->showFullScreen();
     }
 }
 /*检测触摸屏校验程序是否执行完成，完成的情况下显示软件的整体界面*/
@@ -1624,6 +2194,7 @@ void mdmedical::DetectCalibrate()
     if(m_QProcess_calibration->state() == 0)
     {
         this->show();  //显示软件的整体界面
+        this->managerdialog->show();
         if(m_pQTimer_detectcalibrate->isActive())
             m_pQTimer_detectcalibrate->stop();
     }
@@ -1653,9 +2224,93 @@ void mdmedical::ShowLeftCureTime(void)
             }
         }
         m_second--;
-        time = "剩余治疗时间："  + QString::number(m_minute, 10) + ":" + QString::number(m_second, 10);
-        m_QLeftcureTime->setText(time);
+        lefttime = "剩余治疗时间："  + QString::number(m_minute, 10) + ":" + QString::number(m_second, 10);
+        m_QLeftcureTime->setText(lefttime);
 
+}
+
+bool mdmedical::SearchFirmwareName(const char *basePath,const char *filename)
+{
+        DIR *dir;
+        struct dirent *ptr;
+        bool isFileExits = false;
+
+        if ((dir=opendir(basePath)) == NULL)
+        {
+            perror("Open dir error...");
+            return isFileExits;
+        }
+
+        while ((ptr=readdir(dir)) != NULL)
+        {
+            if(strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..")==0)    ///current dir OR parrent dir
+                continue;
+            else if(ptr->d_type == 8)    ///file
+            {
+                printf("d_name:%s/%s\n",basePath,ptr->d_name);
+                if(strstr(ptr->d_name,filename) != NULL)
+                {
+                    m_bIsExistFirmware = true;
+                    isFileExits = true;
+                    break;
+                }
+            }
+            //else if(ptr->d_type == 10)    ///link file
+             //   printf("d_name:%s/%s\n",basePath,ptr->d_name);
+//            else if(ptr->d_type == 4)    ///dir
+//            {
+//                memset(base,'\0',sizeof(base));
+//                strcpy(base,basePath);
+//                strcat(base,"/");
+//                strcat(base,ptr->d_name);
+//                SearchFirmwareName(base);
+//            }
+        }
+        closedir(dir);
+
+        return isFileExits;
+}
+
+
+
+void mdmedical::CopyUserData()
+{
+        DIR *dir;
+        struct dirent *ptr;
+        char *tmp_pos = NULL;
+        char dest_dir[48] = "/udisk/";
+        char src_dir[48] = "/home/scandata/";
+        char *basePath = "/home/scandata";
+
+        if ((dir=opendir(basePath)) == NULL)
+        {
+            perror("Open dir error...");
+            return ;
+        }
+
+        while ((ptr=readdir(dir)) != NULL)
+        {
+            if(strcmp(ptr->d_name,".")==0 || strcmp(ptr->d_name,"..")==0)    ///current dir OR parrent dir
+                continue;
+            else if(ptr->d_type == 8)    ///file
+            {
+                //printf("d_name:%s/%s\n",basePath,ptr->d_name);
+                tmp_pos = strstr(ptr->d_name,"20");
+                strcat(dest_dir,tmp_pos);
+                strcat(src_dir,ptr->d_name);
+                CopyFile(src_dir,dest_dir);
+                printf("copy  %s  to  %s\n",src_dir,dest_dir);
+//                if(strstr(ptr->d_name,filename) != NULL)
+//                {
+//                    m_bIsExistFirmware = true;
+//                    isFileExits = true;
+//                    break;
+//                }
+                //CopyFile(ptr->d_name,"/home/scandata/"+);
+            }
+
+        }
+        closedir(dir);
 }
 
 void mdmedical::on_pushButton_showcam_clicked()
@@ -1697,22 +2352,214 @@ void mdmedical::ShowCam()
 
 void mdmedical::WriteData()
 {
-    printf("222222222222222\n");
+    char time[4]={0};
+    sprintf(time,"%d",second);
+    ws->label(row,col,time,xf);
+    second++;
+    col++;
 
-    float f = (float)(sel1.powerrate[0]-0x30) + ((float)(sel1.powerrate[2]-0x30)/10);
-    oFile << currTmp[0] << "," << impedance[0] << ","<<f<<endl;
-    f = (float)(sel2.powerrate[0]-0x30) + ((float)(sel2.powerrate[2]-0x30)/10);
-    oFile << currTmp[2] << "," << impedance[1] << ","<<f<< endl;
-    f = (float)(sel4.powerrate[0]-0x30) + ((float)(sel4.powerrate[2]-0x30)/10);
-    oFile << currTmp[4] << "," << impedance[2] << ","<<f<< endl;
-    f = (float)(sel5.powerrate[0]-0x30) + ((float)(sel5.powerrate[2]-0x30)/10);
-    oFile << currTmp[6] << "," << impedance[3] << ","<<f<< endl;
+
+    QString data0 = QString("%1").arg(impedance[0]);
+    ws->label(row,col,data0.toStdString().c_str(),xf);
+    col++;
+    QString data3 = QString("%1").arg(impedance[1]);
+    ws->label(row,col,data3.toStdString().c_str(),xf);
+    col++;
+    QString data6 = QString("%1").arg(impedance[2]);
+    ws->label(row,col,data6.toStdString().c_str(),xf);
+    col++;
+    QString data9 = QString("%1").arg(impedance[3]);
+    ws->label(row,col,data9.toStdString().c_str(),xf);
+    col++;
+
+
+
+    QString data1 = QString("%1").arg(g_fCurrTmp[0]);
+    ws->label(row,col,data1.toStdString().c_str(),xf);
+    col++;
+    QString data4 = QString("%1").arg(g_fCurrTmp[2]);
+     ws->label(row,col,data4.toStdString().c_str(),xf);
+     col++;
+     QString data7 = QString("%1").arg(g_fCurrTmp[4]);
+     ws->label(row,col,data7.toStdString().c_str(),xf);
+     col++;
+     QString data10 = QString("%1").arg(g_fCurrTmp[6]);
+     ws->label(row,col,data10.toStdString().c_str(),xf);
+     col++;
+
+
+
+    QString data2 = QString("%1").arg(g_fCurrTmp[1]);
+    ws->label(row,col,data2.toStdString().c_str(),xf);
+    col++;
+    QString data5 = QString("%1").arg(g_fCurrTmp[3]);
+    ws->label(row,col,data5.toStdString().c_str(),xf);
+    col++;
+    QString data8 = QString("%1").arg(g_fCurrTmp[5]);
+    ws->label(row,col,data8.toStdString().c_str(),xf);
+    col++;
+    QString data11 = QString("%1").arg(g_fCurrTmp[7]);
+    ws->label(row,col,data11.toStdString().c_str(),xf);
+
+    row++;
+    col = 0;
+
+    //float f = (float)(sel1.powerrate[0]-0x30) + ((float)(sel1.powerrate[2]-0x30)/10);
+    //f = (float)(sel2.powerrate[0]-0x30) + ((float)(sel2.powerrate[2]-0x30)/10);
+    //f = (float)(sel4.powerrate[0]-0x30) + ((float)(sel4.powerrate[2]-0x30)/10);
+    //f = (float)(sel5.powerrate[0]-0x30) + ((float)(sel5.powerrate[2]-0x30)/10);
+}
+
+/*固件升级显示状态，包括进度条与升级完成提示*/
+void mdmedical::ShowUpdateStr()
+{
+    if(g_bisUpdatesuccess)
+    {
+        mymanagerdialog->label->setText(g_version);
+        g_bisUpdatesuccess = false;
+        QMessageBox::information(this,"update window",QString::fromUtf8("更新完成"));
+        if(m_pShowUpdateFinished->isActive())
+            m_pShowUpdateFinished->stop();
+    }
+
+    static int i =0 ;
+    if(i == 0)
+    {
+        mymanagerdialog->updateProgressBar->setRange(0,g_updateprocess);
+        //mymanagerdialog->updateProgressBar->setMinimumSize(0,100);
+        i++;
+    }
+
+    if(g_bStartProcessBar)
+    {
+        mymanagerdialog->updateProgressBar->setValue(sel1.m_updateprocess + sel2.m_updateprocess + sel4.m_updateprocess + sel5.m_updateprocess);
+
+        //updateProgressBar->setMinimumSize(0,100);
+        //mymanagerdialog->updateProgressBar->setVisible(1);
+    }
+
 }
 
 
 
+void mdmedical::RecordTempture()
+{
+
+    static int count = 0;
+    if(count == 0)
+    {
+        col = 0;
+        row = 2;
+        second = 1;
+        xf = wb.xformat();
+        ws = wb.sheet("sheet1");
+
+        string time = "时间 秒";
+            string label = "1st单位：阻抗欧姆";
+            string label1 = "1st单位：℃ 针尖";
+            string label2 = "1st单位：℃ 粘膜";
+
+            string channel1 = "通道1";
+            string channel2 = "通道2";
+            string channel3 = "通道3";
+            string channel4 = "通道4";
 
 
+            cell  = ws->label(0,1,label,xf);
+            ws->merge(0,1,0,4);
+            cell->halign(HALIGN_CENTER);   //单元格水平方向居中
+
+            cell  = ws->label(0,5,label1,xf);
+            ws->merge(0,5,0,8);
+            cell->halign(HALIGN_CENTER);   //单元格水平方向居中
+
+            cell  = ws->label(0,9,label2,xf);
+            ws->merge(0,9,0,12);
+            cell->halign(HALIGN_CENTER);   //单元格水平方向居中
+
+
+
+                ws->label(1,0,time,xf);
+
+                ws->label(1,1,channel1,xf);
+                ws->label(1,2,channel2,xf);
+                ws->label(1,3,channel3,xf);
+                ws->label(1,4,channel4,xf);
+
+                ws->label(1,5,channel1,xf);
+                ws->label(1,6,channel2,xf);
+                ws->label(1,7,channel3,xf);
+                ws->label(1,8,channel4,xf);
+
+                ws->label(1,9,channel1,xf);
+                ws->label(1,10,channel2,xf);
+                ws->label(1,11,channel3,xf);
+                ws->label(1,12,channel4,xf);
+
+    }
+    count++;
+    char time[4]={0};
+    sprintf(time,"%d",second);
+    ws->label(row,col,time,xf);
+    second++;
+    col++;
+
+
+    QString data0 = QString("%1").arg(impedance[0]);
+    ws->label(row,col,data0.toStdString().c_str(),xf);
+    col++;
+    QString data3 = QString("%1").arg(impedance[1]);
+    ws->label(row,col,data3.toStdString().c_str(),xf);
+    col++;
+    QString data6 = QString("%1").arg(impedance[2]);
+    ws->label(row,col,data6.toStdString().c_str(),xf);
+    col++;
+    QString data9 = QString("%1").arg(impedance[3]);
+    ws->label(row,col,data9.toStdString().c_str(),xf);
+    col++;
+
+
+
+    QString data1 = QString("%1").arg(g_fCurrTmp[0]);
+    ws->label(row,col,data1.toStdString().c_str(),xf);
+    col++;
+    QString data4 = QString("%1").arg(g_fCurrTmp[2]);
+     ws->label(row,col,data4.toStdString().c_str(),xf);
+     col++;
+     QString data7 = QString("%1").arg(g_fCurrTmp[4]);
+     ws->label(row,col,data7.toStdString().c_str(),xf);
+     col++;
+     QString data10 = QString("%1").arg(g_fCurrTmp[6]);
+     ws->label(row,col,data10.toStdString().c_str(),xf);
+     col++;
+
+
+
+    QString data2 = QString("%1").arg(g_fCurrTmp[1]);
+    ws->label(row,col,data2.toStdString().c_str(),xf);
+    col++;
+    QString data5 = QString("%1").arg(g_fCurrTmp[3]);
+    ws->label(row,col,data5.toStdString().c_str(),xf);
+    col++;
+    QString data8 = QString("%1").arg(g_fCurrTmp[5]);
+    ws->label(row,col,data8.toStdString().c_str(),xf);
+    col++;
+    QString data11 = QString("%1").arg(g_fCurrTmp[7]);
+    ws->label(row,col,data11.toStdString().c_str(),xf);
+
+    row++;
+    col = 0;
+
+    if(count == 60)
+    {
+        if(m_pRecordTempture->isActive())
+            m_pRecordTempture->stop();
+
+        printf("create file finished!\n");
+        wb.Dump("datafilename_tempture.xls");
+
+    }
+}
 
 
 
@@ -1889,3 +2736,48 @@ void mdmedical::on_pushButton_closecam_clicked()
 {
     isclosecam = true;
 }
+
+bool mdmedical::CopyFile(QString src, QString dst)
+{
+    if (QFile::exists(dst))
+    {
+        QFile::remove(dst);
+    }
+
+    if (!QFile::copy(src, dst))
+    {
+        printf( "copy faild\n");
+        return false;
+    }
+    return true;
+}
+
+#if 0
+void mdmedical::PlaySound(QString soundpath)
+{
+    StopSound();
+    QStringList args;
+    args << soundpath;
+    mplayerSoundProcess->start(QString("/usr/bin/mplayer"), args);
+}
+
+void mdmedical::StopSound()
+{
+    if(mplayerSoundProcess&&mplayerSoundProcess->isOpen())
+        mplayerSoundProcess->close();
+}
+#endif
+
+
+void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    QString txt(msg);
+    if(outFile.isOpen()&&outFile.isWritable())
+    {
+        QTextStream ts(&outFile);
+        ts << txt;
+    }
+}
+
+
+
