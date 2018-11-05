@@ -53,16 +53,18 @@ SOURCES       = main.cpp \
 		qcustomplot.cpp \
 		serial.cpp \
 		cam.cpp \
-		managerdialog.cpp moc_mdmedical.cpp \
-		moc_qcustomplot.cpp
+		settingpage.cpp moc_mdmedical.cpp \
+		moc_qcustomplot.cpp \
+		moc_settingpage.cpp
 OBJECTS       = main.o \
 		mdmedical.o \
 		qcustomplot.o \
 		serial.o \
 		cam.o \
-		managerdialog.o \
+		settingpage.o \
 		moc_mdmedical.o \
-		moc_qcustomplot.o
+		moc_qcustomplot.o \
+		moc_settingpage.o
 DIST          = ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/spec_pre.prf \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/common/unix.conf \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/common/linux.conf \
@@ -167,12 +169,14 @@ DIST          = ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs
 		qcustomplot.h \
 		serial.h \
 		cam.h \
-		managerdialog.h main.cpp \
+		managerdialog.h \
+		settingpage.h \
+		systeminfo.h main.cpp \
 		mdmedical.cpp \
 		qcustomplot.cpp \
 		serial.cpp \
 		cam.cpp \
-		managerdialog.cpp
+		settingpage.cpp
 QMAKE_TARGET  = mdmedical
 DESTDIR       = 
 TARGET        = mdmedical
@@ -181,7 +185,7 @@ TARGET        = mdmedical
 first: all
 ####### Build rules
 
-$(TARGET): ui_mdmedical.h ui_managerdialog.h $(OBJECTS)  
+$(TARGET): ui_mdmedical.h ui_managerdialog.h ui_systeminfo.h $(OBJECTS)  
 	$(LINK) $(LFLAGS) -o $(TARGET) $(OBJECTS) $(OBJCOMP) $(LIBS)
 
 Makefile: mdmedical.pro ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/devices/linux-buildroot-g++/qmake.conf ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/spec_pre.prf \
@@ -410,9 +414,9 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents mdmedical.h qcustomplot.h serial.h cam.h managerdialog.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mdmedical.cpp qcustomplot.cpp serial.cpp cam.cpp managerdialog.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents mdmedical.ui managerdialog.ui $(DISTDIR)/
+	$(COPY_FILE) --parents mdmedical.h qcustomplot.h serial.h cam.h managerdialog.h settingpage.h systeminfo.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mdmedical.cpp qcustomplot.cpp serial.cpp cam.cpp settingpage.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mdmedical.ui managerdialog.ui systeminfo.ui $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -444,9 +448,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/data/dummy.cpp
 	/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/arm-buildroot-linux-gnueabihf-g++ -pipe -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 -Os --sysroot=/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot -O2 -O3 -std=gnu++11 -Wall -W -dM -E -o moc_predefs.h ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_mdmedical.cpp moc_qcustomplot.cpp
+compiler_moc_header_make_all: moc_mdmedical.cpp moc_qcustomplot.cpp moc_settingpage.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_mdmedical.cpp moc_qcustomplot.cpp
+	-$(DEL_FILE) moc_mdmedical.cpp moc_qcustomplot.cpp moc_settingpage.cpp
 moc_mdmedical.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QWidget \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qwidget.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtwidgetsglobal.h \
@@ -583,6 +587,10 @@ moc_mdmedical.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QProgressBar \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qprogressbar.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QDialog \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QMessageLogContext \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QtDebug \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QFile \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QTextStream \
 		qcustomplot.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QObject \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QPointer \
@@ -944,6 +952,13 @@ moc_mdmedical.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QHeaderView \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QPushButton \
+		ui_settingdialog.h \
+		settingpage.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QRadioButton \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLineEdit \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QGroupBox \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QVBoxLayout \
+		systeminfo.h \
 		xlslib.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlsys.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlconfig.h \
@@ -1461,11 +1476,156 @@ moc_qcustomplot.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/ar
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/moc
 	/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/devices/linux-buildroot-g++ -I/home/root/mdworkdir/mdmedical1 -I/home/root/mdworkdir/xlslib_arm/xlslib/tmp/include -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5 -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/include/c++/5.4.0 -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/include/c++/5.4.0/arm-buildroot-linux-gnueabihf -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/include/c++/5.4.0/backward -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/lib/gcc/arm-buildroot-linux-gnueabihf/5.4.0/include -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/lib/gcc/arm-buildroot-linux-gnueabihf/5.4.0/include-fixed -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/include -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include qcustomplot.h -o moc_qcustomplot.cpp
 
+moc_settingpage.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QTextStream \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qtextstream.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qiodevice.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qglobal.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qconfig-bootstrapped.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qconfig.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qtcore-config.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsystemdetection.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qprocessordetection.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qcompilerdetection.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qtypeinfo.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsysinfo.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qlogging.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qflags.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qtypetraits.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qatomic.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qbasicatomic.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qatomic_bootstrap.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qgenericatomic.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qatomic_cxx11.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qatomic_msvc.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qglobalstatic.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmutex.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qnumeric.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qversiontagging.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobject.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobjectdefs.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qnamespace.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobjectdefs_impl.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qstring.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qchar.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qbytearray.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qrefcount.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qarraydata.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qstringbuilder.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qlist.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qalgorithms.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qiterator.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qhashfunctions.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qpair.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qbytearraylist.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qstringlist.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qregexp.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qstringmatcher.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qcoreevent.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qscopedpointer.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmetatype.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvarlengtharray.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qcontainerfwd.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobject_impl.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qlocale.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvariant.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmap.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qdebug.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qhash.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvector.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qpoint.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qset.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qcontiguouscache.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsharedpointer.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qshareddata.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsharedpointer_impl.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QDebug \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QString \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QPushButton \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qpushbutton.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtwidgetsglobal.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtguiglobal.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtgui-config.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtwidgets-config.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractbutton.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qicon.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsize.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpixmap.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpaintdevice.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qwindowdefs.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qwindowdefs_win.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qrect.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmargins.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qcolor.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qrgb.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qrgba64.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qimage.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpixelformat.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtransform.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qmatrix.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpolygon.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qregion.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qdatastream.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qline.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpainterpath.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qkeysequence.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qwidget.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpalette.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qbrush.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qfont.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qfontmetrics.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qfontinfo.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qsizepolicy.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qcursor.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qevent.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qurl.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qurlquery.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qfile.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qfiledevice.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvector2d.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtouchdevice.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QWidget \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlabel.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QRadioButton \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qradiobutton.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLineEdit \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlineedit.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextcursor.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextformat.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpen.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextoption.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QComboBox \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcombobox.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemdelegate.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyleoption.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractspinbox.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvalidator.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qregularexpression.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qslider.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractslider.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyle.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabbar.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabwidget.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QGroupBox \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qgroupbox.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QVBoxLayout \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qboxlayout.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlayout.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlayoutitem.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qgridlayout.h \
+		settingpage.h \
+		moc_predefs.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/moc
+	/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/moc $(DEFINES) --include ./moc_predefs.h -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/devices/linux-buildroot-g++ -I/home/root/mdworkdir/mdmedical1 -I/home/root/mdworkdir/xlslib_arm/xlslib/tmp/include -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5 -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtPrintSupport -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/include/c++/5.4.0 -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/include/c++/5.4.0/arm-buildroot-linux-gnueabihf -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/include/c++/5.4.0/backward -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/lib/gcc/arm-buildroot-linux-gnueabihf/5.4.0/include -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/lib/gcc/arm-buildroot-linux-gnueabihf/5.4.0/include-fixed -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/include -I/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include settingpage.h -o moc_settingpage.cpp
+
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
-compiler_uic_make_all: ui_mdmedical.h ui_managerdialog.h
+compiler_uic_make_all: ui_mdmedical.h ui_managerdialog.h ui_systeminfo.h
 compiler_uic_clean:
-	-$(DEL_FILE) ui_mdmedical.h ui_managerdialog.h
+	-$(DEL_FILE) ui_mdmedical.h ui_managerdialog.h ui_systeminfo.h
 ui_mdmedical.h: mdmedical.ui \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/uic
 	/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/uic mdmedical.ui -o ui_mdmedical.h
@@ -1473,6 +1633,10 @@ ui_mdmedical.h: mdmedical.ui \
 ui_managerdialog.h: managerdialog.ui \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/uic
 	/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/uic managerdialog.ui -o ui_managerdialog.h
+
+ui_systeminfo.h: systeminfo.ui \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/uic
+	/home/root/mdworkdir/cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/uic systeminfo.ui -o ui_systeminfo.h
 
 compiler_yacc_decl_make_all:
 compiler_yacc_decl_clean:
@@ -1621,6 +1785,10 @@ main.o: main.cpp mdmedical.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QProgressBar \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qprogressbar.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QDialog \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QMessageLogContext \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QtDebug \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QFile \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QTextStream \
 		qcustomplot.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QObject \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QPointer \
@@ -1982,6 +2150,13 @@ main.o: main.cpp mdmedical.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QHeaderView \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QPushButton \
+		ui_settingdialog.h \
+		settingpage.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QRadioButton \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLineEdit \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QGroupBox \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QVBoxLayout \
+		systeminfo.h \
 		xlslib.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlsys.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlconfig.h \
@@ -2150,6 +2325,10 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QProgressBar \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qprogressbar.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QDialog \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QMessageLogContext \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QtDebug \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QFile \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QTextStream \
 		qcustomplot.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QObject \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QPointer \
@@ -2511,6 +2690,13 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QHeaderView \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QPushButton \
+		ui_settingdialog.h \
+		settingpage.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QRadioButton \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLineEdit \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QGroupBox \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QVBoxLayout \
+		systeminfo.h \
 		xlslib.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlsys.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlconfig.h \
@@ -3080,9 +3266,10 @@ cam.o: cam.cpp cam.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobject_impl.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o cam.o cam.cpp
 
-managerdialog.o: managerdialog.cpp ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QVariant \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvariant.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qatomic.h \
+settingpage.o: settingpage.cpp settingpage.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QTextStream \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qtextstream.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qiodevice.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qglobal.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qconfig-bootstrapped.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qconfig.h \
@@ -3095,21 +3282,25 @@ managerdialog.o: managerdialog.cpp ../cqr40_linuxqt_bv3/buildroot-2017.02.3/outp
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qlogging.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qflags.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qtypetraits.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qglobalstatic.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmutex.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qnumeric.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qversiontagging.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qatomic.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qbasicatomic.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qatomic_bootstrap.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qgenericatomic.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qatomic_cxx11.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qatomic_msvc.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qbytearray.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qrefcount.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qglobalstatic.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmutex.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qnumeric.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qversiontagging.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobject.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobjectdefs.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qnamespace.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qarraydata.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobjectdefs_impl.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qstring.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qchar.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qbytearray.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qrefcount.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qarraydata.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qstringbuilder.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qlist.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qalgorithms.h \
@@ -3120,57 +3311,57 @@ managerdialog.o: managerdialog.cpp ../cqr40_linuxqt_bv3/buildroot-2017.02.3/outp
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qstringlist.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qregexp.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qstringmatcher.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qcoreevent.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qscopedpointer.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmetatype.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvarlengtharray.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qcontainerfwd.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobjectdefs.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobjectdefs_impl.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobject_impl.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qlocale.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvariant.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmap.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qdebug.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qhash.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qtextstream.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qiodevice.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobject.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qcoreevent.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qscopedpointer.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qobject_impl.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qlocale.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qshareddata.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qvector.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qpoint.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qset.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qcontiguouscache.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsharedpointer.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qshareddata.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsharedpointer_impl.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QAction \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qaction.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QDebug \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QString \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QPushButton \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qpushbutton.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtwidgetsglobal.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtguiglobal.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtgui-config.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtwidgets-config.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qkeysequence.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qwidget.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractbutton.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qicon.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsize.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpixmap.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpaintdevice.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qwindowdefs.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qwindowdefs_win.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmargins.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpaintdevice.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qrect.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qsize.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpalette.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qmargins.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qcolor.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qrgb.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qrgba64.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qbrush.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qimage.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpixelformat.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtransform.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qmatrix.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpolygon.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qregion.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qdatastream.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qline.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtransform.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpainterpath.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qimage.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpixelformat.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpixmap.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qkeysequence.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qwidget.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpalette.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qbrush.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qfont.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qfontmetrics.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qfontinfo.h \
@@ -3183,26 +3374,20 @@ managerdialog.o: managerdialog.cpp ../cqr40_linuxqt_bv3/buildroot-2017.02.3/outp
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qfiledevice.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvector2d.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtouchdevice.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qicon.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qactiongroup.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QApplication \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qapplication.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qcoreapplication.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qeventloop.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qdesktopwidget.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qguiapplication.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qinputmethod.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QButtonGroup \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qbuttongroup.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QDialog \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qdialog.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QHeaderView \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qheaderview.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemview.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractscrollarea.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QWidget \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlabel.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qitemselectionmodel.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QRadioButton \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qradiobutton.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLineEdit \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlineedit.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextcursor.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextformat.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qpen.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtextoption.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QComboBox \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qcombobox.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractitemdelegate.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qstyleoption.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractspinbox.h \
@@ -3214,18 +3399,24 @@ managerdialog.o: managerdialog.cpp ../cqr40_linuxqt_bv3/buildroot-2017.02.3/outp
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabbar.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qtabwidget.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qrubberband.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlabel.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QPushButton \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qpushbutton.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qabstractbutton.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o managerdialog.o managerdialog.cpp
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qabstractitemmodel.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QGroupBox \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qgroupbox.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QVBoxLayout \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qboxlayout.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlayout.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlayoutitem.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qgridlayout.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o settingpage.o settingpage.cpp
 
 moc_mdmedical.o: moc_mdmedical.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mdmedical.o moc_mdmedical.cpp
 
 moc_qcustomplot.o: moc_qcustomplot.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_qcustomplot.o moc_qcustomplot.cpp
+
+moc_settingpage.o: moc_settingpage.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_settingpage.o moc_settingpage.cpp
 
 ####### Install
 

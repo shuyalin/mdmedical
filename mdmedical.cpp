@@ -7,8 +7,6 @@ bool port[4] = {false,false,false,false};
 
 float g_fCurrTmp[8];
 float showtmp[4];
-//bool isTmpFinished = false;
-//bool isShowFinished = false;
 int g_iIndexpower;
 
 bool g_bWaitCommand = false;
@@ -29,19 +27,30 @@ bool g_bPwmdMode = false;
 bool g_bPwmiMode = false;
 bool g_bPwmkeepMode = false;
 bool g_bCureClosed = false;
-
+bool g_bisBreakGas = false;
 bool g_bPrepareKey = false;
 bool g_bFootKey = false;
+bool g_bChargeGasKey = false;
+bool g_bBreakGasKey = false;
+bool g_bIsCreateAdcDetectpthread = true;
 bool g_bFootKeyHide = false;
 bool m_bIsfootkeyPress;
 bool g_bisupdatestatus = true;
 bool g_bisfinishedupdate = false;
 bool g_bupdatestatus = false;
 bool g_bisUpdatesuccess = false;
+bool g_bisGatheringAdcValue = false;
+bool g_isInsertingPipe = false;
+bool g_isShowTemp = false;
+
+static char g_cWhichKey = 0;
+static bool g_bKeyValue = false;  //first press or second press  true:first press  false:second press
+
 volatile bool g_bIsFinishiIncreasePower = true;
 volatile bool g_bIsfinishReadtempture = true;
 
-
+extern CCURRENTSTATUSVALUE surrentstatusvalue;
+extern bool g_isSetting;
 
 volatile bool channel_mask[4]={false,false,false,false};
 
@@ -54,6 +63,26 @@ QVector<double> temp3(1200);  //nianmo Min
 //pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;/*初始化互斥锁*/
 //pthread_cond_t cond = PTHREAD_COND_INITIALIZER;/*初始化条件变量*/
 
+static const char curePeriodValue[][8] = {"1:00","1:10","1:20","1:30","1:40","1:50","2:00","2:10","2:20","2:30","2:40",
+"2:50","3:00","3:10","3:20","3:30","3:40","3:50","4:00","4:10","4:20","4:30","4:40","4:50","5:00","5:10","5:20","5:30","5:40","5:50",
+  "6:00","6:10","6:20","6:30","6:40","6:50","7:00","7:10","7:20","7:30","7:40","7:50","8:00","8:10","8:20","8:30","8:40","8:50",
+ "9:00","9:10","9:20","9:30","9:40","9:50","10:00"};
+
+
+static const char cureTempValue[][8] = {"50","51","52","53","54","55","56","57","58","59","60","61","62",
+"63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84",
+"85","86","87","88","89","90","91","92","93","94","95"};
+
+
+
+static const char   curePowerValue[][8] = {"0.1","0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0","5.5","6.0",
+"6.5","7.0","7.5","8.0","8.5","9.0","9.5","10.0"};
+
+static const char   cureWaterValue[][8] = {"25.0","25.5","26.0","26.5","27.0","27.5","28.0","28.5","29.0","29.5","30.0","30.5",
+"31.0","31.5","32.0","32.5","33.0","33.5","34.0","34.5","35.0","35.5","36.0","36.5","37.0","37.5","38.0","38.5","39.0","39.5",
+"40.0","40.5","41.0","41.5","42.0","42.5","43.0","43.5","44.0","44.5","45.0","45.5","46.0","46.5","47.0","47.5","48.0","48.5",
+"49.0","49.5","50.0","50.5","51.0","51.5","52.0","52.5","53.0","53.5","54.0","54.5","55.0","55.5","56.0","56.5","57.0","57.5",
+"58.0","58.5","59.0","59.5","60.0","60.5","61.0","61.5","62.0","62.5","63.0","63.5","64.0","64.5","65.0"};
 
 
 const char powerindex[21][5]={"0.1","0.5","1.0","1.5","2.0","2.5","3.0","3.5","4.0","4.5","5.0","5.5","6.0","6.5","7.0","7.5","8.0","8.5","9.0","9.5","10.0"};
@@ -130,11 +159,20 @@ void *SendSerialFun(void *args)
 bool Idle_send()
 {
     bool ok1 = false,ok2 = false,ok3 = false,ok4 = false;
+    int ret = -1000 ;
     if(!channel_mask[0])
     {
         sel1.IdleSend(0);
         sel1.SendData();
-        sel1.RecvData();
+        ret == sel1.RecvData();
+        if(ret == -1)
+        {
+            DIGI_TRACE(ERROR_INFO,"Idle_send sel1 Select fail!");
+        }
+        else if(ret == -2)
+        {
+            DIGI_TRACE(ERROR_INFO,"Idle_send sel1 Select timeout!");
+        }
         ok1 = sel1.ParseIdleSendReturnData();
     }
 
@@ -142,27 +180,51 @@ bool Idle_send()
     {
         sel2.IdleSend(0);
         sel2.SendData();
-        sel2.RecvData();
-        ok2 = sel2.ParsePrepareSendReturnData();
+        ret = sel2.RecvData();
+        if(ret == -1)
+        {
+            DIGI_TRACE(ERROR_INFO,"Idle_send sel2 Select fail!");
+        }
+        else if(ret == -2)
+        {
+            DIGI_TRACE(ERROR_INFO,"Idle_send sel2 Select timeout!");
+        }
+        ok2 = sel2.ParseIdleSendReturnData();
     }
 
     if(!channel_mask[2])
     {
         sel4.IdleSend(0);
         sel4.SendData();
-        sel4.RecvData();
-        ok3 = sel4.ParsePrepareSendReturnData();
+        ret = sel4.RecvData();
+        if(ret == -1)
+        {
+            DIGI_TRACE(ERROR_INFO,"Idle_send sel4 Select fail!");
+        }
+        else if(ret == -2)
+        {
+            DIGI_TRACE(ERROR_INFO,"Idle_send sel4 Select timeout!");
+        }
+        ok3 = sel4.ParseIdleSendReturnData();
     }
 
     if(!channel_mask[3])
     {
         sel5.IdleSend(0);
         sel5.SendData();
-        sel5.RecvData();
-        ok4 = sel5.ParsePrepareSendReturnData();
+        ret = sel5.RecvData();
+        if(ret == -1)
+        {
+            DIGI_TRACE(ERROR_INFO,"Idle_send sel5 Select fail!");
+        }
+        else if(ret == -2)
+        {
+            DIGI_TRACE(ERROR_INFO,"Idle_send sel5 Select timeout!");
+        }
+        ok4 = sel5.ParseIdleSendReturnData();
     }
 
-    return (ok1||ok2||ok3||ok4);
+    return (ok1&&ok2&&ok3&&ok4);
 }
 
 bool cure_send()
@@ -576,7 +638,7 @@ bool cure_close()
 }
 
 
-void *GetCurrTmp(void *args)
+void *GetCurrTmp(__attribute__((unused))void *args)
 {
         unsigned int i;
         unsigned short currTmp1[32]={0};
@@ -593,125 +655,134 @@ void *GetCurrTmp(void *args)
         usleep(2*1000);
         while(1)
         {
-                    gettimeofday(&start,NULL);
-                    for(i=3;i<11;i++)
-                    {
-
-                        if(channel_mask[(i-3)/2])
-                            continue;
-
-                        ioctl(fd,i,12);
-
-                        read(fd,currTmp1,32);
-                        tmp1[i-3] = fliter(currTmp1);
-//                        for(k=0;k<16;k++)
-//                            printf(" %hu ",currTmp1[k]);
-//                            printf("\n");
-
-                    }
-                     //printf("\n"); printf("\n"); printf("\n");
-                    gettimeofday(&end,NULL);
-                    usleep(10*1000-(end.tv_sec*1000000+end.tv_usec-start.tv_usec-start.tv_sec*1000000));
-                   //printf("chazhi is %d\n",end.tv_usec-start.tv_usec);
-
-#if 1
-                    for(i=3;i<11;i++)
-                    {
-                        if(channel_mask[(i-3)/2])
-                            continue;
-
-                        ioctl(fd,i,12);
-
-                        read(fd,&currTmp2,32);
-                        tmp2[i-3] = fliter(currTmp2);
-
-//                        for(k=0;k<16;k++)
-//                            printf(" %hu ",currTmp1[k]);
-//                            printf("\n");
-
-                    }
-                    //printf("\n");printf("\n");printf("*********************************************************************88\n");
-#endif
-
-                    g_bIsFinishiIncreasePower = true;
-                    for(int j=0;j<8;j++)
-                    {
-                        g_fCurrTmp[j] = (tmp1[j] + tmp2[j])/2;
-                        //g_fCurrTmp[j] = tmp1[j];
-                        //if(g_fCurrTmp[j]>80)
-                          //printf(" channel  %d   %.1f   %lf  %lf\n ",j,tmp1[j],tmp2[j],g_fCurrTmp[j]);
-                    }
-
- /************************************以上读温度************************************************/
-                    usleep(300*1000);
- /************************************以下发送串口命令************************************************/
-#if 1
-                    if(!g_bupdatestatus)
-                    {
-                #if 1
-                        if(g_bPrerareMode && g_bWaitCommand)
+            if(g_isInsertingPipe)
+            {
+                        g_isShowTemp = true;
+                        gettimeofday(&start,NULL);
+                        for(i=3;i<11;i++)
                         {
-                            Prepare_send();
-                            g_bPrerareMode = false;
+
+                            if(channel_mask[(i-3)/2])
+                                continue;
+
+                            ioctl(fd,i,12);
+
+                            read(fd,currTmp1,32);
+                            tmp1[i-3] = fliter(currTmp1);
+    //                        for(k=0;k<16;k++)
+    //                            printf(" %hu ",currTmp1[k]);
+    //                            printf("\n");
+
                         }
-                        else
+                         //printf("\n"); printf("\n"); printf("\n");
+                        gettimeofday(&end,NULL);
+                        usleep(10*1000-(end.tv_sec*1000000+end.tv_usec-start.tv_usec-start.tv_sec*1000000));
+                       //printf("chazhi is %d\n",end.tv_usec-start.tv_usec);
+
+    #if 1
+                        for(i=3;i<11;i++)
                         {
-                            usleep(10*1000);
+                            if(channel_mask[(i-3)/2])
+                                continue;
+
+                            ioctl(fd,i,12);
+
+                            read(fd,&currTmp2,32);
+                            tmp2[i-3] = fliter(currTmp2);
+
+    //                        for(k=0;k<16;k++)
+    //                            printf(" %hu ",currTmp1[k]);
+    //                            printf("\n");
+
                         }
-                #if 1
-                        if(g_bIdleMode)
+                        //printf("\n");printf("\n");printf("*********************************************************************88\n");
+    #endif
+
+                        g_bIsFinishiIncreasePower = true;
+                        for(int j=0;j<8;j++)
                         {
-                            g_bWaitCommand = Idle_send();
-                            g_bIdleMode = false;
+                            g_fCurrTmp[j] = (tmp1[j] + tmp2[j])/2;
+                            //g_fCurrTmp[j] = tmp1[j];
+                            //if(g_fCurrTmp[j]>80)
+                              //printf(" channel  %d   %.1f   %lf  %lf\n ",j,tmp1[j],tmp2[j],g_fCurrTmp[j]);
                         }
-                #endif
-                #endif
-                #if 1
-                        if(g_bCureMode)
+
+     /************************************以上读温度************************************************/
+                        usleep(300*1000);
+     /************************************以下发送串口命令************************************************/
+    #if 1
+                        if(!g_bupdatestatus)
                         {
-                            g_bIsfinishReadtempture = false;
-                            cure_send();
-                            g_bIsfinishReadtempture = true;
-                            g_bCureMode = false;
+                    #if 1
+                            if(g_bPrerareMode && g_bWaitCommand)
+                            {
+                                Prepare_send();
+                                g_bPrerareMode = false;
+                            }
+                            else
+                            {
+                                usleep(10*1000);
+                            }
+                    #if 1
+                            if(g_bIdleMode)
+                            {
+                                g_bWaitCommand = Idle_send();
+                                g_bIdleMode = false;
+                            }
+                    #endif
+                    #endif
+                    #if 1
+                            if(g_bCureMode)
+                            {
+                                g_bIsfinishReadtempture = false;
+                                cure_send();
+                                g_bIsfinishReadtempture = true;
+                                g_bCureMode = false;
+                            }
+                    #endif
+                    #if 1
+                            if(g_bPwmdMode)
+                            {
+                                pwmd_send();
+                                usleep(20*1000);
+                                g_bPwmdMode = false;
+                                usleep(100*1000);
+                            }
+                    #endif
+                    #if 1
+                            if(g_bPwmiMode)
+                            {
+                                pwmi_send();
+                                usleep(20*1000);
+                                g_bPwmiMode = false;
+                                usleep(100*1000);
+                            }
+                    #endif
+                    #if 1
+                            if(g_bPwmkeepMode)
+                            {
+                                printf("PWM----KKKKKKKKKKKKKKKKK  %f\n",g_fCurrTmp[3]);
+                                pwmkeep_send();
+                                g_bPwmkeepMode = false;
+                            }
+                            if(g_bCureClosed)
+                            {
+                                cure_close();
+                                g_bCureClosed = false;
+                            }
+                    #endif
                         }
-                #endif
-                #if 1
-                        if(g_bPwmdMode)
-                        {
-                            pwmd_send();
-                            usleep(20*1000);
-                            g_bPwmdMode = false;
-                            usleep(100*1000);
-                        }
-                #endif
-                #if 1
-                        if(g_bPwmiMode)
-                        {
-                            pwmi_send();
-                            usleep(20*1000);
-                            g_bPwmiMode = false;
-                            usleep(100*1000);
-                        }
-                #endif
-                #if 1
-                        if(g_bPwmkeepMode)
-                        {
-                            printf("PWM----KKKKKKKKKKKKKKKKK  %f\n",g_fCurrTmp[3]);
-                            pwmkeep_send();
-                            g_bPwmkeepMode = false;
-                        }
-                        if(g_bCureClosed)
-                        {
-                            cure_close();
-                            g_bCureClosed = false;
-                        }
-                #endif
-                    }
+            }
+            else
+            {
+                 g_isShowTemp = false;
+                usleep(100*1000);
+            }
   #endif                      //usleep(400*1000);
         }
 }
 /*检测按键按下，/dev/mdmedical_buttons为按键的驱动程序的设备节点，驱动采用中断方式检测按键是否按下*/
-void *detect_key_func(void *args)
+void *detect_key_func(__attribute__((unused))void *args)
 {
     unsigned char key_val;
     int fd = open("/dev/mdmedical_buttons", O_RDWR);
@@ -719,24 +790,116 @@ void *detect_key_func(void *args)
     {
         printf("open device failed!\n");
     }
+
     while(1)
     {
         read(fd, &key_val, 1);
         if(key_val == 0x1)
         {
-            g_bPrepareKey = true;
+            g_cWhichKey = 1;
+            g_bKeyValue = !g_bKeyValue;
         }
         else if(key_val == 0x2)
         {
-             g_bFootKey = true;
+             g_cWhichKey = 2;
+             g_bKeyValue = !g_bKeyValue;
+        }
+        else if(key_val == 0x3)
+        {
+            g_cWhichKey = 3;
+            g_bKeyValue = !g_bKeyValue;
+        }
+        else if(key_val == 0x4)
+        {
+             g_cWhichKey = 4;
+             g_bKeyValue = !g_bKeyValue;
+        }
+        else if(key_val == 0x5)
+        {
+            g_isInsertingPipe = false;
+        }
+        else if(key_val == 0x85)
+        {
+            g_isInsertingPipe = true;
         }
         //printf("key_val = 0x%x\n", key_val);
     }
 }
+
+void *deteAdcValve(__attribute__((unused))void *args)
+{
+    bool bIsBreakingGas = false;
+    int fd = open("/dev/mdmedical_adc", O_RDWR);
+    if(fd < 0)
+    {
+        printf("open /dev/mdmedical_adc failed!\n");
+    }
+        int  AdValue=0;
+        char val = 2, flag1 = 1,flag2 = 1,flag3 = 1,Air_pressure = 0;
+        while(g_bisGatheringAdcValue)
+        {
+          read(fd,&AdValue,4);
+          //printf("fffffffff %d\n",AdValue);
+          usleep(200*1000);
+          Air_pressure = (char)((0.032 * AdValue - 0.1)/0.04);
+           if(AdValue > 40 && flag1 == 1)
+           {
+               flag1 = 0;
+               flag2 = 1;
+               flag3 = 1;
+               val = 3;
+               write(fd,&val,4);
+
+           }
+           else if(AdValue <= 40 && AdValue >= 38 && flag2 == 1)
+           {
+               flag1 = 1;
+               flag2 = 0;
+               flag3 = 1;
+               val = 4;
+               write(fd,&val,4);
+
+           }
+           else if(AdValue < 38 && flag3 == 1)
+           {
+               flag1 = 1;
+               flag2 = 1;
+               flag3 = 0;
+
+               if(!bIsBreakingGas)
+               {
+                   val = 2;
+                   write(fd,&val,4);
+               }
+               else
+               {
+                   if(AdValue < 10)
+                   {
+                       val = 4;
+                       bIsBreakingGas  = false;
+                       write(fd,&val,4);
+                   }
+               }
+
+           }
+
+           if(g_bisBreakGas)
+           {
+               g_bisBreakGas = false;
+               bIsBreakingGas = true;
+               val = 3;
+               write(fd,&val,4);
+           }
+        }
+        g_bIsCreateAdcDetectpthread = true;
+        close(fd);
+        return NULL;
+}
+
 char g_version[14];
 int g_updateprocess;
 bool g_bStartProcessBar = false;
-void *update_firmware(void *args)
+void *update_firmware(__attribute__((unused))void *args)
 {
 
        bool ok1=false,ok2=false,ok3=false,ok4=false;
@@ -838,6 +1001,7 @@ void *update_firmware(void *args)
             g_bisUpdatesuccess = true;
         free(buff);
         g_bisupdatestatus = true;
+        return NULL;
 }
 
 mdmedical::mdmedical(QWidget *parent) :
@@ -862,7 +1026,11 @@ mdmedical::mdmedical(QWidget *parent) :
         row = 0;
         isclosecam = false;
         istakephoto = false;
+        m_isShowGreen = true;
+        m_isShowRed = true;
         m_bIsExistFirmware = false;
+
+        mysetpage = NULL;
 
         if(outFile.size()>LOG_MAXSIZE)
                 outFile.remove();
@@ -920,6 +1088,13 @@ mdmedical::mdmedical(QWidget *parent) :
         managerdialog = new QDialog(this);// superFactoryMode;
         mymanagerdialog->setupUi(managerdialog);
 
+        mysysteminfo = new Ui_SystemInfo();
+        systeminfo = new QDialog(this);// superFactoryMode;
+        mysysteminfo->setupUi(systeminfo);
+
+        mysetpage = new CSettingPage;
+
+
 
         pthread_mutex_init(&g_mutex, NULL);
 
@@ -941,28 +1116,17 @@ mdmedical::mdmedical(QWidget *parent) :
         m_pQTimer_preparestatus = new QTimer(this);
         m_pQTimer_detectkey = new QTimer(this);
         m_pQTimer_detectcalibrate = new QTimer(this);
-
         m_pQTimer_showpowerrate1 = new QTimer(this);
         m_pQTimer_showpowerrate2 = new QTimer(this);
         m_pQTimer_showpowerrate3 = new QTimer(this);
         m_pQTimer_showpowerrate4 = new QTimer(this);
-
         m_pQTimer_showcam = new QTimer(this);
-
         m_pQTimer_writedata = new QTimer(this);
+        m_pQTimerFlushShowInfo = new QTimer(this);
 
-        m_pShowUpdateFinished = new QTimer(this);
+        m_pQTimerShowUpdateFinished = new QTimer(this);
 
-        m_pRecordTempture  = new QTimer(this);
-
-         m_QComboBox_cureperiod = new QComboBox(this);
-         InitCureReriodSubWidgets();
-         m_QComboBox_targettemp = new QComboBox(this);
-         InitTargetTempSubWidgets();
-         m_QComboBox_maxpower = new QComboBox(this);
-         InitMaxPowerSubWidgets();
-         m_QComboBox_curepos = new QComboBox(this);
-         InitCurePosSubWidgets();
+        m_pQTimerRecordTempture  = new QTimer(this);
 
          m_QLabel_pic1 = new QLabel(this);
          m_QLeftcureTime = new QLabel(this);
@@ -978,7 +1142,7 @@ mdmedical::mdmedical(QWidget *parent) :
          connect(mymanagerdialog->pushButton_copy,SIGNAL(clicked()),this,SLOT(CopyUserData()));
          connect(mymanagerdialog->pushButton_exit,SIGNAL(clicked()),this,SLOT(ExitManagerPage()));
 
-
+        connect(mysysteminfo->pushButton_sure,SIGNAL(clicked()),this,SLOT(ExitSystemInfoPage()));
 
         connect(m_pQTimer_showpowerrate1, SIGNAL(timeout()), this, SLOT(ShowPowerRate()));
 //        connect(m_pQTimer_showpowerrate2, SIGNAL(timeout()), this, SLOT(on_time_out()));
@@ -996,24 +1160,24 @@ mdmedical::mdmedical(QWidget *parent) :
         connect(m_pQTimer_showcam, SIGNAL(timeout()), this, SLOT(ShowCam()));
 
         connect(m_pQTimer_writedata, SIGNAL(timeout()), this, SLOT(WriteData()));
-        connect(m_pShowUpdateFinished, SIGNAL(timeout()), this, SLOT(ShowUpdateStr()));
+        connect(m_pQTimerShowUpdateFinished, SIGNAL(timeout()), this, SLOT(ShowUpdateStr()));
 
-        connect(m_pRecordTempture, SIGNAL(timeout()), this, SLOT(RecordTempture()));
-
+        connect(m_pQTimerRecordTempture, SIGNAL(timeout()), this, SLOT(RecordTempture()));
+        connect(m_pQTimerFlushShowInfo, SIGNAL(timeout()), this, SLOT(FlushShowInfo()));
         connect(ui->pushButton_td1,SIGNAL(clicked()),this,SLOT(GetChanel1Value()));
         connect(ui->pushButton_td2,SIGNAL(clicked()),this,SLOT(GetChanel2Value()));
         connect(ui->pushButton_td3,SIGNAL(clicked()),this,SLOT(GetChanel3Value()));
         connect(ui->pushButton_td4,SIGNAL(clicked()),this,SLOT(GetChanel4Value()));
 
-        connect(m_QComboBox_cureperiod, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetCureCycleCurrentValue()));
-        connect(m_QComboBox_targettemp, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetTargetTmpCurrentValue()));
-        connect(m_QComboBox_maxpower, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetMaxPowerCurrentValue()));
-        connect(m_QComboBox_curepos, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetCurePosCurrentValue()));
+        //connect(m_QComboBox_cureperiod, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetCureCycleCurrentValue()));
+        //connect(m_QComboBox_targettemp, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetTargetTmpCurrentValue()));
+        //connect(m_QComboBox_maxpower, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetMaxPowerCurrentValue()));
+        //connect(m_QComboBox_curepos, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetCurePosCurrentValue()));
 
 
 
 
-        ui->label_showcurtime->setGeometry(1,1,400,50);
+        ui->label_showcurtime->setGeometry(350,10,400,50);
         ui->label_showcurtime->setText("");
 
         ui->label_tmp1->setGeometry(280,100,65,20);  //chanel   1
@@ -1031,15 +1195,20 @@ mdmedical::mdmedical(QWidget *parent) :
         ui->label_impedance3->setGeometry(280,430,45,20);
         ui->label_impedance4->setGeometry(100,292,45,20);
 
-        ui->label_tmp1->setText(QString::fromUtf8("tmp1"));
-        ui->label_tmp2->setText(QString::fromUtf8("tmp2"));
-        ui->label_tmp3->setText(QString::fromUtf8("tmp3"));
-        ui->label_tmp4->setText(QString::fromUtf8("tmp4"));
+        ui->label_impedance1->setText("");
+        ui->label_impedance2->setText("");
+        ui->label_impedance3->setText("");
+        ui->label_impedance4->setText("");
 
-        ui->label_tmp5->setText(QString::fromUtf8("15.6"));
-        ui->label_tmp6->setText(QString::fromUtf8("15.6"));
-        ui->label_tmp7->setText(QString::fromUtf8("15.6"));
-        ui->label_tmp8->setText(QString::fromUtf8("15.6"));
+        ui->label_tmp1->setText("");
+        ui->label_tmp2->setText("");
+        ui->label_tmp3->setText("");
+        ui->label_tmp4->setText("");
+
+        ui->label_tmp5->setText("");
+        ui->label_tmp6->setText("");
+        ui->label_tmp7->setText("");
+        ui->label_tmp8->setText("");
 
         ui->label_tmp1->setAlignment(Qt::AlignHCenter);
         ui->label_tmp2->setAlignment(Qt::AlignHCenter);
@@ -1051,14 +1220,6 @@ mdmedical::mdmedical(QWidget *parent) :
         ui->label_tmp8->setAlignment(Qt::AlignHCenter);
 
         ui->label_gasvalue->setAlignment(Qt::AlignHCenter);
-
-
-        ui->label_impedance1->setText("");
-        ui->label_impedance2->setText("");
-        ui->label_impedance3->setText("");
-        ui->label_impedance4->setText("");
-
-
 
 
     #if 0
@@ -1074,15 +1235,15 @@ mdmedical::mdmedical(QWidget *parent) :
 
     #endif
 
-        ui->label_tmp1->setStyleSheet ("background-color:green;color:black;");
-        ui->label_tmp2->setStyleSheet ("background-color:green;color:black;");
-        ui->label_tmp3->setStyleSheet ("background-color:green;color:black;");
-        ui->label_tmp4->setStyleSheet ("background-color:green;color:black;");
+        ui->label_tmp1->setStyleSheet ("background-color:red;color:red;");
+        ui->label_tmp2->setStyleSheet ("background-color:red;color:red;");
+        ui->label_tmp3->setStyleSheet ("background-color:red;color:red;");
+        ui->label_tmp4->setStyleSheet ("background-color:red;color:red;");
 
-        ui->label_tmp5->setStyleSheet ("background-color:green;color:black;");
-        ui->label_tmp6->setStyleSheet ("background-color:green;color:black;");
-        ui->label_tmp7->setStyleSheet ("background-color:green;color:black;");
-        ui->label_tmp8->setStyleSheet ("background-color:green;color:black;");
+        ui->label_tmp5->setStyleSheet ("background-color:red;color:red;");
+        ui->label_tmp6->setStyleSheet ("background-color:red;color:red;");
+        ui->label_tmp7->setStyleSheet ("background-color:red;color:red;");
+        ui->label_tmp8->setStyleSheet ("background-color:red;color:red;");
 
         ui->label_impedance1->setStyleSheet ("background-color:gray;color:black;");
         ui->label_impedance2->setStyleSheet ("background-color:gray;color:black;");
@@ -1091,62 +1252,162 @@ mdmedical::mdmedical(QWidget *parent) :
 
         ui->label_gasvalue->setStyleSheet ("background-color:white;color:black;");
 
+
+
+
+        ui->groupBox_zlzq->setGeometry(800,20,200,100);
+        ui->groupBox_zlzq->setTitle("cure period");
+        ui->label_zlzqIcon->setGeometry(810,50,30,30);
+        ui->label_zlzqIcon->setPixmap(QPixmap(MAINPAGE"period.png"));
+        ui->label_zlzq->setGeometry(850,50,130,30);
+        ui->label_zlzq->setText("1:00");
+        ui->groupBox_zlzq->setStyleSheet(
+                        "QGroupBox"
+                                  "{"
+                                  "border: 2px solid black;"
+                                  "border-radius:8px;"
+                                  "margin-top:6px;"
+                                  "}"
+                                  "QGroupBox:title"
+                                  "{"
+                                  "color:black;"
+                                  "subcontrol-origin: margin;"
+                                  "left: 10px;"
+                                  "}"
+
+                          );
+
+
+        ui->groupBox_tagetTmp->setGeometry(800,130,200,100);
+        ui->groupBox_tagetTmp->setTitle("taget temp");
+        ui->label_tagetIcon->setGeometry(810,160,30,30);
+        ui->label_tagetIcon->setPixmap(QPixmap(MAINPAGE"temp.png"));
+        ui->label_tagetTmp->setGeometry(850,160,130,30);
+        ui->label_tagetTmp->setText("50");
+        ui->groupBox_tagetTmp->setStyleSheet(
+                        "QGroupBox"
+                                  "{"
+                                  "border: 2px solid black;"
+                                  "border-radius:8px;"
+                                  "margin-top:6px;"
+                                  "}"
+                                  "QGroupBox:title"
+                                  "{"
+                                  "color:black;"
+                                  "subcontrol-origin: margin;"
+                                  "left: 10px;"
+                                  "}"
+
+                          );
+
+
+
+
+        ui->groupBox_Max->setGeometry(800,240,200,100);
+        ui->groupBox_Max->setTitle("Max power");
+        ui->label_MaxIcon->setGeometry(810,270,30,30);
+        ui->label_MaxIcon->setPixmap(QPixmap(MAINPAGE"power.png"));
+        ui->label_Max->setGeometry(850,270,130,30);
+        ui->label_Max->setText("1.0");
+        ui->groupBox_Max->setStyleSheet(
+                        "QGroupBox"
+                                  "{"
+                                  "border: 2px solid black;"
+                                  "border-radius:8px;"
+                                  "margin-top:6px;"
+                                  "}"
+                                  "QGroupBox:title"
+                                  "{"
+                                  "color:black;"
+                                  "subcontrol-origin: margin;"
+                                  "left: 10px;"
+                                  "}"
+
+                          );
+
+
+
+        ui->groupBox_channelselect->setGeometry(800,350,200,150);
+        ui->groupBox_channelselect->setTitle("chanel select");
+        ui->pushButton_td1->setGeometry(840,420,40,20);
+        ui->pushButton_td2->setGeometry(870,390,40,20);
+        ui->pushButton_td3->setGeometry(920,420,40,20);
+        ui->pushButton_td4->setGeometry(870,450,40,20);
         ui->pushButton_td1->setText("1");
         ui->pushButton_td2->setText("2");
         ui->pushButton_td3->setText("3");
         ui->pushButton_td4->setText("4");
+        ui->groupBox_channelselect->setStyleSheet(
+                        "QGroupBox"
+                                  "{"
+                                  "border: 2px solid black;"
+                                  "border-radius:8px;"
+                                  "margin-top:6px;"
+                                  "}"
+                                  "QGroupBox:title"
+                                  "{"
+                                  "color:black;"
+                                  "subcontrol-origin: margin;"
+                                  "left: 10px;"
+                                  "}"
 
-        ui->pushButton_td1->setGeometry(710,230,40,20);
-        ui->pushButton_td2->setGeometry(740,255,40,20);
-        ui->pushButton_td3->setGeometry(710,280,40,20);
-        ui->pushButton_td4->setGeometry(680,255,40,20);
+                          );
+
+
+
+
+        ui->groupBox_coldwaterstream->setGeometry(800,510,200,100);
+        ui->groupBox_coldwaterstream->setTitle("cold water");
+        ui->label_coldwaterstreamIcon->setGeometry(810,540,30,30);
+        ui->label_coldwaterstreamIcon->setPixmap(QPixmap(MAINPAGE"water.png"));
+        ui->label_coldwaterstream->setGeometry(850,540,130,30);
+        ui->label_coldwaterstream->setText("100");
+        ui->groupBox_coldwaterstream->setStyleSheet(
+                        "QGroupBox"
+                                  "{"
+                                  "border: 2px solid black;"
+                                  "border-radius:8px;"
+                                  "margin-top:6px;"
+                                  "}"
+                                  "QGroupBox:title"
+                                  "{"
+                                  "color:black;"
+                                  "subcontrol-origin: margin;"
+                                  "left: 10px;"
+                                  "}"
+
+                          );
+
+
 
 
         ui->pushButton_waitmode->setGeometry(900,150,100,30);
         ui->pushButton_waitmode->setText(QString::fromUtf8("待机模式"));
-
+        ui->pushButton_waitmode->setVisible(0);
         ui->pushButton_calibrate->setGeometry(900,100,100,30);
         ui->pushButton_calibrate->setText(QString::fromUtf8("管理员模式"));
-
-        ui->label_tagetTmp->setGeometry(680,75,100,20);
-        ui->label_tagetTmp->setText(QString::fromUtf8("目标温度"));
-
-        ui->label_Max->setGeometry(680,140,100,20);
-        ui->label_Max->setText(QString::fromUtf8("最大功率"));
+        ui->pushButton_calibrate->setVisible(0);
 
 
 
-        m_QComboBox_cureperiod->setGeometry(695,34,100,30);
-
-        m_QComboBox_targettemp->setGeometry(695,99,100,30);
-
-        m_QComboBox_maxpower->setGeometry(695,164,100,30);
-
-        m_QComboBox_curepos->setGeometry(695,344,100,30);
 
 
-        ui->label_tdxz->setGeometry(680,200,80,20);
-        ui->label_tdxz->setText(QString::fromUtf8("通道选择"));
-
-        ui->label_zlwz->setGeometry(680,320,100,20);
-        ui->label_zlwz->setText(QString::fromUtf8("治疗位置(cm)"));
-
-        ui->label_zlzq->setGeometry(680,10,100,20);
-        ui->label_zlzq->setText(QString::fromUtf8("治疗周期"));
 
 
 
         ui->label_devidestatus->setGeometry(0,740,200,20);
         ui->label_devidestatus->setText(QString::fromUtf8("设备正常"));
 
-        ui->pushButton_addgas->setGeometry(40,120,60,30);
-        ui->pushButton_losegas->setGeometry(110,120,60,30);
-        ui->label_gasvalue->setGeometry(80,80,40,20);
+        //ui->pushButton_addgas->setGeometry(40,120,60,30);
+        //ui->pushButton_losegas->setGeometry(110,120,60,30);
+        //ui->label_gasvalue->setGeometry(80,80,40,20);
 
-        ui->label_gasvalue->setText("150");
-        ui->pushButton_addgas->setText(QString::fromUtf8("充气"));
-        ui->pushButton_losegas->setText(QString::fromUtf8("放气"));
-
+        //ui->label_gasvalue->setText("150");
+        //ui->pushButton_addgas->setText(QString::fromUtf8("充气"));
+        //ui->pushButton_losegas->setText(QString::fromUtf8("放气"));
+        ui->pushButton_addgas->setVisible(0);
+        ui->pushButton_losegas->setVisible(0);
+        ui->label_gasvalue->setVisible(0);
 
 
         m_QLabel_pic1->setGeometry(205,200,180,180);
@@ -1239,16 +1500,26 @@ mdmedical::mdmedical(QWidget *parent) :
        ui->label_showcam->setText("");
        ui->pushButton_showcam->setGeometry(500,340,80,35);
        ui->pushButton_showcam->setText(QString::fromUtf8("摄像头"));
+       ui->pushButton_showcam->setVisible(0);
 
        ui->pushButton_takephoto->setGeometry(450,660,80,35);
        ui->pushButton_takephoto->setText(QString::fromUtf8("拍照"));
+       ui->pushButton_takephoto->setVisible(0);
        ui->pushButton_closecam->setGeometry(550,660,80,35);
        ui->pushButton_closecam->setText(QString::fromUtf8("关闭"));
+       ui->pushButton_closecam->setVisible(0);
 
 
+        ui->pushButton_setting->setGeometry(10,20,80,40);
+        ui->pushButton_setting->setText(QString::fromUtf8("系统设置"));
+
+        ui->pushButton_systeminfo->setGeometry(10,90,80,40);
+        ui->pushButton_systeminfo->setText(QString::fromUtf8("系统信息"));
 
 
+        InitMapValue();
 
+#if 0
        ui->widget->setGeometry(700,500,324,268);
        m_QPushButton_on_off = new QPushButton(ui->widget);
        m_switch_up = new QPushButton(ui->widget);
@@ -1263,7 +1534,7 @@ mdmedical::mdmedical(QWidget *parent) :
        m_QPushButton_on_off->setGeometry(10,100,60,30);
        m_switch_up->setGeometry(80,100,60,30);
        m_switch_down->setGeometry(150,100,60,30);
-
+#endif
         qDebug("This is a debug message");
        //m_pRecordTempture->start(1000);
 
@@ -1328,262 +1599,27 @@ mdmedical::~mdmedical()
     delete ui;
 }
 
-/*初始化治疗周期下拉框的时间显示条目*/
-void mdmedical::InitCureReriodSubWidgets()
+
+void mdmedical::InitMapValue()
 {
-    m_QComboBox_cureperiod->addItem(QWidget::tr("1:00"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("1:10"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("1:20"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("1:30"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("1:40"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("1:50"));
-
-    m_QComboBox_cureperiod->addItem(QWidget::tr("2:00"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("2:10"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("2:20"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("2:30"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("2:40"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("2:50"));
-
-    m_QComboBox_cureperiod->addItem(QWidget::tr("3:00"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("3:10"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("3:20"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("3:30"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("3:40"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("3:50"));
-
-    m_QComboBox_cureperiod->addItem(QWidget::tr("4:00"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("4:10"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("4:20"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("4:30"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("4:40"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("4:50"));
-
-    m_QComboBox_cureperiod->addItem(QWidget::tr("5:00"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("5:10"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("5:20"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("5:30"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("5:40"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("5:50"));
-
-    m_QComboBox_cureperiod->addItem(QWidget::tr("6:00"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("6:10"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("6:20"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("6:30"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("6:40"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("6:50"));
-
-    m_QComboBox_cureperiod->addItem(QWidget::tr("7:00"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("7:10"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("7:20"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("7:30"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("7:40"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("7:50"));
-
-    m_QComboBox_cureperiod->addItem(QWidget::tr("8:00"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("8:10"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("8:20"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("8:30"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("8:40"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("8:50"));
-
-    m_QComboBox_cureperiod->addItem(QWidget::tr("9:00"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("9:10"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("9:20"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("9:30"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("9:40"));
-    m_QComboBox_cureperiod->addItem(QWidget::tr("9:50"));
-
-    m_QComboBox_cureperiod->addItem(QWidget::tr("10:00"));
-
-    //m_QComboBox_cureperiod->setEditable(true);
-//    m_QComboBox_cureperiod->setMaxVisibleItems(10);
-//     m_QComboBox_cureperiod->insertItem(55, tr("Insert item"));
-//     m_QComboBox_cureperiod->insertSeparator(55);
-
+    int i = 0;
+    for(i = 0; i < 55; i++)
+    {
+        mymapperiod.insert(i,curePeriodValue[i]);
+    }
+    for(i = 0; i < 46; i++)
+    {
+        mymaptemp.insert(i,cureTempValue[i]);
+    }
+    for(i = 0; i < 21; i++)
+    {
+        mymappower.insert(i,curePowerValue[i]);
+    }
+    for(i = 0; i < 81; i++)
+    {
+        mymapwater.insert(i,cureWaterValue[i]);
+    }
 }
-/*初始化目标温度下拉框的温度显示条目*/
-void mdmedical::InitTargetTempSubWidgets()
-{
-    m_QComboBox_targettemp->addItem(QWidget::tr("50"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("51"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("52"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("53"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("54"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("55"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("56"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("57"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("58"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("59"));
-
-    m_QComboBox_targettemp->addItem(QWidget::tr("60"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("61"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("62"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("63"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("64"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("65"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("66"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("67"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("68"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("69"));
-
-    m_QComboBox_targettemp->addItem(QWidget::tr("70"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("71"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("72"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("73"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("74"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("75"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("76"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("77"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("78"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("79"));
-
-    m_QComboBox_targettemp->addItem(QWidget::tr("80"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("81"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("82"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("83"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("84"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("85"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("86"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("87"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("88"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("89"));
-
-    m_QComboBox_targettemp->addItem(QWidget::tr("90"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("91"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("92"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("93"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("94"));
-    m_QComboBox_targettemp->addItem(QWidget::tr("95"));
-
-    //m_QComboBox_targettemp->setEditable(true);
-//    m_QComboBox_targettemp->setMaxVisibleItems(10);
-//     m_QComboBox_targettemp->insertItem(46, tr("Insert item"));
-//     m_QComboBox_targettemp->insertSeparator(46);
-}
-/*初始化最大功率下拉框的功率显示条目*/
-void mdmedical::InitMaxPowerSubWidgets()
-{
-    m_QComboBox_maxpower->addItem(QWidget::tr("0.1"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("0.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("1.0"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("1.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("2.0"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("2.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("3.0"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("3.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("4.0"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("4.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("5.0"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("5.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("6.0"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("6.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("7.0"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("7.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("8.0"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("8.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("9.0"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("9.5"));
-    m_QComboBox_maxpower->addItem(QWidget::tr("10.0"));
-
-    //m_QComboBox_maxpower->setEditable(true);
-//    m_QComboBox_maxpower->setMaxVisibleItems(10);
-//     m_QComboBox_maxpower->insertItem(21, tr("Insert item"));
-//     m_QComboBox_maxpower->insertSeparator(21);
-
-}
-
-/*初始化治疗位置下拉框的位置显示条目*/
-void mdmedical::InitCurePosSubWidgets()
-{
-    m_QComboBox_curepos->addItem(QWidget::tr("25.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("25.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("26.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("26.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("27.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("27.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("28.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("28.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("29.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("29.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("30.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("30.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("31.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("31.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("32.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("32.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("33.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("33.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("34.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("34.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("35.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("35.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("36.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("36.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("37.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("37.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("38.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("38.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("39.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("39.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("40.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("40.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("41.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("41.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("42.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("42.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("43.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("43.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("44.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("44.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("45.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("45.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("46.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("46.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("47.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("47.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("48.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("48.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("49.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("49.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("50.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("50.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("51.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("51.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("52.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("52.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("53.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("53.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("54.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("54.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("55.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("55.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("56.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("56.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("57.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("57.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("58.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("58.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("59.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("59.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("60.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("60.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("61.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("61.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("62.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("62.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("63.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("63.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("64.0"));
-    m_QComboBox_curepos->addItem(QWidget::tr("64.5"));
-    m_QComboBox_curepos->addItem(QWidget::tr("65.0"));
-
-    //m_QComboBox_curepos->setEditable(true);
-//    m_QComboBox_curepos->setMaxVisibleItems(10);
-//     m_QComboBox_curepos->insertItem(81, tr("Insert item"));
-//     m_QComboBox_curepos->insertSeparator(81);
-}
-
 
 void mdmedical::ShowTimeCurrent(void)
 {
@@ -1600,55 +1636,100 @@ void mdmedical::ShowTimeCurrent(void)
 /*显示温度*/
 void mdmedical::ShowCurrentTmp(void)
 {
-        if(!channel_mask[0])
+        if(g_isShowTemp)
         {
-            QString data1 = QString("%1").arg(g_fCurrTmp[0]);
-            QString data2 = QString("%1").arg(g_fCurrTmp[1]);
-            ui->label_tmp1->setText(data1.mid(0,4));
-            ui->label_tmp2->setText(data2.mid(0,4));
-        }
-        else
-        {
-            ui->label_tmp1->setText("");
-            ui->label_tmp2->setText("");
-        }
-        if(!channel_mask[1])
-        {
-            QString data3 = QString("%1").arg(g_fCurrTmp[2]);
-            QString data4 = QString("%1").arg(g_fCurrTmp[3]);
-            ui->label_tmp3->setText(data3.mid(0,4));
-            ui->label_tmp4->setText(data4.mid(0,4));
-        }
-        else
-        {
-            ui->label_tmp3->setText("");
-            ui->label_tmp4->setText("");
-        }
+            if(m_isShowGreen)
+            {
+                m_isShowGreen = false;
+                m_isShowRed = true;
+                if(!channel_mask[0])
+                {
+                    ui->label_tmp1->setStyleSheet ("background-color:green;color:black;");
+                    ui->label_tmp2->setStyleSheet ("background-color:green;color:black;");
+                }
 
-        if(!channel_mask[2])
-        {
-            QString data5 = QString("%1").arg(g_fCurrTmp[4]);
-            QString data6 = QString("%1").arg(g_fCurrTmp[5]);
-            ui->label_tmp5->setText(data5.mid(0,4));
-            ui->label_tmp6->setText(data6.mid(0,4));
+                if(!channel_mask[1])
+                {
+                    ui->label_tmp3->setStyleSheet ("background-color:green;color:black;");
+                    ui->label_tmp4->setStyleSheet ("background-color:green;color:black;");
+                }
+                if(!channel_mask[2])
+                {
+                    ui->label_tmp5->setStyleSheet ("background-color:green;color:black;");
+                    ui->label_tmp6->setStyleSheet ("background-color:green;color:black;");
+                }
+                if(!channel_mask[3])
+                {
+                    ui->label_tmp7->setStyleSheet ("background-color:green;color:black;");
+                    ui->label_tmp8->setStyleSheet ("background-color:green;color:black;");
+                }
+            }
+            if(!channel_mask[0])
+            {
+                QString data1 = QString("%1").arg(g_fCurrTmp[0]);
+                QString data2 = QString("%1").arg(g_fCurrTmp[1]);
+                ui->label_tmp1->setText(data1.mid(0,4));
+                ui->label_tmp2->setText(data2.mid(0,4));
+            }
+            else
+            {
+                ui->label_tmp1->setText("");
+                ui->label_tmp2->setText("");
+            }
+            if(!channel_mask[1])
+            {
+                QString data3 = QString("%1").arg(g_fCurrTmp[2]);
+                QString data4 = QString("%1").arg(g_fCurrTmp[3]);
+                ui->label_tmp3->setText(data3.mid(0,4));
+                ui->label_tmp4->setText(data4.mid(0,4));
+            }
+            else
+            {
+                ui->label_tmp3->setText("");
+                ui->label_tmp4->setText("");
+            }
+
+            if(!channel_mask[2])
+            {
+                QString data5 = QString("%1").arg(g_fCurrTmp[4]);
+                QString data6 = QString("%1").arg(g_fCurrTmp[5]);
+                ui->label_tmp5->setText(data5.mid(0,4));
+                ui->label_tmp6->setText(data6.mid(0,4));
+            }
+            else
+            {
+                ui->label_tmp5->setText("");
+                ui->label_tmp6->setText("");
+            }
+            if(!channel_mask[3])
+            {
+                QString data7 = QString("%1").arg(g_fCurrTmp[6]);
+                QString data8 = QString("%1").arg(g_fCurrTmp[7]);
+                ui->label_tmp7->setText(data7.mid(0,4));
+                ui->label_tmp8->setText(data8.mid(0,4));
+            }
+            else
+            {
+                ui->label_tmp7->setText("");
+                ui->label_tmp8->setText("");
+            }
         }
         else
         {
-            ui->label_tmp5->setText("");
-            ui->label_tmp6->setText("");
-        }
-        if(!channel_mask[3])
-        {
-            QString data7 = QString("%1").arg(g_fCurrTmp[6]);
-            QString data8 = QString("%1").arg(g_fCurrTmp[7]);
-            ui->label_tmp7->setText(data7.mid(0,4));
-            ui->label_tmp8->setText(data8.mid(0,4));
-        }
-        else
-        {
-            printf("gggggggggggggggggg\n");
-            ui->label_tmp7->setText("");
-            ui->label_tmp8->setText("");
+            if(m_isShowRed)
+            {
+                m_isShowGreen = true;
+                m_isShowRed = false;
+                ui->label_tmp1->setStyleSheet ("background-color:red;color:red;");
+                ui->label_tmp2->setStyleSheet ("background-color:red;color:red;");
+                ui->label_tmp3->setStyleSheet ("background-color:red;color:red;");
+                ui->label_tmp4->setStyleSheet ("background-color:red;color:red;");
+
+                ui->label_tmp5->setStyleSheet ("background-color:red;color:red;");
+                ui->label_tmp6->setStyleSheet ("background-color:red;color:red;");
+                ui->label_tmp7->setStyleSheet ("background-color:red;color:red;");
+                ui->label_tmp8->setStyleSheet ("background-color:red;color:red;");
+            }
         }
 }
 
@@ -1715,7 +1796,7 @@ void mdmedical::Updata()
             printf("create pthread failed!\n");
             return ;
         }
-        m_pShowUpdateFinished->start(100);
+        m_pQTimerShowUpdateFinished->start(100);
     }
     else
     {
@@ -1732,6 +1813,10 @@ void mdmedical::ExitManagerPage()
     g_bupdatestatus = false;
     managerdialog->close();
 }
+void mdmedical::ExitSystemInfoPage()
+{
+    systeminfo->close();;
+}
 
 /*治疗模式下绘制温度曲线图与控制功率的操作*/
 void mdmedical::makeGraph()
@@ -1744,7 +1829,7 @@ void mdmedical::makeGraph()
 
 
 
-    if((closegraph++) ==  (originalInfo.cureCycle*10+60)*2 || g_bFootKeyHide)
+    if((closegraph++) ==  (surrentstatusvalue.cureCycle*10+60)*2 || g_bFootKeyHide)
     {
         if(m_pQTimer_showgraph->isActive())
             m_pQTimer_showgraph->stop();
@@ -1801,20 +1886,20 @@ void mdmedical::makeGraph()
 
         for(i=0;i<4;i++)
         {
-            if(g_fCurrTmp[i] < originalInfo.targetTmp/* &&( (currTmp[0]-lasttmp1)<5.0 || (currTmp[2]-lasttmp2)<5.0 || (currTmp[4]-lasttmp3)<5.0 || (currTmp[6]-lasttmp4)<5.0 &&(limit_count<4))*/)
+            if(g_fCurrTmp[i] < surrentstatusvalue.targetTmp/* &&( (currTmp[0]-lasttmp1)<5.0 || (currTmp[2]-lasttmp2)<5.0 || (currTmp[4]-lasttmp3)<5.0 || (currTmp[6]-lasttmp4)<5.0 &&(limit_count<4))*/)
             {
                 port[i] = true;
                 g_bPwmiMode = true;
                 limit_count++;
                 //printf("PWM increase %d  %f\n",originalInfo.targetTmp,temp[closegraph]);
             }
-            else if(temp[closegraph] < originalInfo.targetTmp /*&& ((currTmp[0]-lasttmp1)>5.0 || (currTmp[2]-lasttmp2)>5.0 || (currTmp[4]-lasttmp3)>5.0 || (currTmp[6]-lasttmp4)>5.0)*/)
+            else if(temp[closegraph] < surrentstatusvalue.targetTmp /*&& ((currTmp[0]-lasttmp1)>5.0 || (currTmp[2]-lasttmp2)>5.0 || (currTmp[4]-lasttmp3)>5.0 || (currTmp[6]-lasttmp4)>5.0)*/)
             {
                 port[i] = true;
                 g_bPwmdMode = true;
                 //printf("%d  %f\n",originalInfo.targetTmp,temp[closegraph]);
             }
-            else if(temp[closegraph] > originalInfo.targetTmp)
+            else if(temp[closegraph] > surrentstatusvalue.targetTmp)
             {
                 port[i] = true;
                 g_bPwmdMode = true;
@@ -1869,8 +1954,6 @@ void mdmedical::HideAllWidget()
     ui->label_tmp8->setVisible(0);
     //ui->label_tagetTmp->setVisible(0);
     ui->label_Max->setVisible(0);
-    ui->label_tdxz->setVisible(0);
-    ui->label_zlwz->setVisible(0);
     ui->pushButton_td1->setVisible(0);
     ui->pushButton_td2->setVisible(0);
     ui->pushButton_td3->setVisible(0);
@@ -1881,9 +1964,9 @@ void mdmedical::HideAllWidget()
     ui->label_impedance2->setVisible(0);
     ui->label_impedance3->setVisible(0);
     ui->label_impedance4->setVisible(0);
-    ui->pushButton_addgas->setVisible(0);
-    ui->pushButton_losegas->setVisible(0);
-    ui->label_gasvalue->setVisible(0);
+    //ui->pushButton_addgas->setVisible(0);
+    //ui->pushButton_losegas->setVisible(0);
+    //ui->label_gasvalue->setVisible(0);
     //ui->menuBar->setVisible(0);
     //ui->mainToolBar->setVisible(0);
 }
@@ -1901,8 +1984,6 @@ void mdmedical::HShowAllWidget()
     ui->label_tmp8->setVisible(1);
     ui->label_tagetTmp->setVisible(1);
     ui->label_Max->setVisible(01);
-    ui->label_tdxz->setVisible(1);
-    ui->label_zlwz->setVisible(1);
     ui->pushButton_td1->setVisible(1);
     ui->pushButton_td2->setVisible(1);
     ui->pushButton_td3->setVisible(1);
@@ -1913,9 +1994,9 @@ void mdmedical::HShowAllWidget()
     ui->label_impedance2->setVisible(1);
     ui->label_impedance3->setVisible(1);
     ui->label_impedance4->setVisible(1);
-    ui->pushButton_addgas->setVisible(1);
-    ui->pushButton_losegas->setVisible(1);
-    ui->label_gasvalue->setVisible(1);
+    //ui->pushButton_addgas->setVisible(1);
+    //ui->pushButton_losegas->setVisible(1);
+    //ui->label_gasvalue->setVisible(1);
     //ui->menuBar->setVisible(1);
     //ui->mainToolBar->setVisible(1);
 }
@@ -1966,36 +2047,10 @@ void mdmedical::OriginalPosition()
 
 }
 
-/*获得当前治疗周期时间*/
-void mdmedical::GetCureCycleCurrentValue()
-{
-    originalInfo.cureCycle = m_QComboBox_cureperiod->currentIndex();
-    m_minute = originalInfo.cureCycle / 6 + 1;
-    printf("sssssssssss  %d\n",m_minute);
-    m_second = originalInfo.cureCycle % 6 *10;
-
-}
-/*获得当前目标温度*/
-void mdmedical::GetTargetTmpCurrentValue()
-{
-    originalInfo.targetTmp = m_QComboBox_targettemp->currentIndex() + 50;
-}
-
-/*获得当前功率值*/
-void mdmedical::GetMaxPowerCurrentValue()
-{
-    originalInfo.maxPower = m_QComboBox_maxpower->currentIndex();
-}
-
-/*获得当前治疗位置值*/
-void mdmedical::GetCurePosCurrentValue()
-{
-    originalInfo.curePos = m_QComboBox_curepos->currentIndex();
-}
-
+#if 1
 void mdmedical::GetChanel1Value()
 {
-    originalInfo.chanel = 1;
+
     if(!channel_mask[0])
         channel_mask[0] = true;
     else
@@ -2003,7 +2058,6 @@ void mdmedical::GetChanel1Value()
 }
 void mdmedical::GetChanel2Value()
 {
-    originalInfo.chanel = 2;
     if(!channel_mask[1])
         channel_mask[1] = true;
     else
@@ -2011,7 +2065,6 @@ void mdmedical::GetChanel2Value()
 }
 void mdmedical::GetChanel3Value()
 {
-    originalInfo.chanel = 3;
     if(!channel_mask[2])
         channel_mask[2] = true;
     else
@@ -2019,14 +2072,13 @@ void mdmedical::GetChanel3Value()
 }
 void mdmedical::GetChanel4Value()
 {
-    originalInfo.chanel = 4;
     if(!channel_mask[3])
         channel_mask[3] = true;
     else
         channel_mask[3] = false;
 }
 
-
+#endif
 /*等待模式按钮槽函数*/
 void mdmedical::on_pushButton_waitmode_clicked()
 {
@@ -2050,51 +2102,63 @@ void mdmedical::on_pushButton_waitmode_clicked()
 /*不断检测是否有按键按下*/
 void mdmedical::DetectKey()
 {
-    if(g_bPrepareKey)
+
+    if(g_cWhichKey == 1)
     {
-        g_bIdleMode = true;
-        g_bPrerareMode = true;
-        m_pQTimer_showimpedance->start(1000);
-        m_pQTimer_preparestatus->start(1000);
-        g_bPrepareKey = false;
+        g_cWhichKey = 0;
+        if(g_bKeyValue)
+        {
+            g_bIdleMode = true;
+            g_bPrerareMode = true;
+            g_bPrepareKey = false;
+            m_pQTimer_showimpedance->start(1000);
+            m_pQTimer_preparestatus->start(1000);
+        }
+        else
+        {
+            ;
+        }
     }
-    if(g_bFootKey && (!m_pQTimer_showgraph->isActive()))
+    else if(g_cWhichKey == 2)
     {
-        m_pQTimer_showgraph->start(500);
-        m_pQTimer_showpowerrate1->start(1000);
-        m_pQTimer_writedata->start(1000);
-        ItemNewPosition();
-        g_iIndexpower = originalInfo.maxPower;
+        g_cWhichKey = 0;
+        if(!m_pQTimer_showgraph->isActive())
+        {
+            m_pQTimer_showgraph->start(500);
+            m_pQTimer_showpowerrate1->start(1000);
+            m_pQTimer_writedata->start(1000);
+            ItemNewPosition();
+            g_iIndexpower = surrentstatusvalue.maxPower;
 
-        originalInfo.cureCycle = m_QComboBox_cureperiod->currentIndex();
-        m_minute = originalInfo.cureCycle / 6 + 1;
-        m_second = originalInfo.cureCycle % 6 *10;
+            //surrentstatusvalue.cureCycle = m_QComboBox_cureperiod->currentIndex();
+            m_minute = surrentstatusvalue.cureCycle / 6 + 1;
+            m_second = surrentstatusvalue.cureCycle % 6 *10;
 
-        m_bIsfootkeyPress = true;
-        m_QLabel_pic1->setGeometry(430,110,130,130);
-        m_QLabel_pic1->setPixmap(QPixmap(RES_POS"step4.jpg"));
+            m_bIsfootkeyPress = true;
+            m_QLabel_pic1->setGeometry(430,110,130,130);
+            m_QLabel_pic1->setPixmap(QPixmap(RES_POS"step4.jpg"));
 
-        g_bCureMode = true;
+            g_bCureMode = true;
 
-        widget->setVisible(1);
-        g_bFootKey = false;
+            widget->setVisible(1);
+            g_bFootKey = false;
 
-        struct tm *t;
-        time_t tt;
-        char data[48] = {0};
-        time(&tt);
-        t = localtime(&tt);
-        sprintf(data,"%s%d%c%d%c%d%c%d%c%d%c%d%s","/home/scandata/",t->tm_year + 1900,'-', t->tm_mon + 1,'-', t->tm_mday,'-', t->tm_hour,'-', t->tm_min,'-', t->tm_sec,".xls");
-        printf("%s\n",data);
-        datafilename = data;
+            struct tm *t;
+            time_t tt;
+            char data[48] = {0};
+            time(&tt);
+            t = localtime(&tt);
+            sprintf(data,"%s%d%c%d%c%d%c%d%c%d%c%d%s","/home/scandata/",t->tm_year + 1900,'-', t->tm_mon + 1,'-', t->tm_mday,'-', t->tm_hour,'-', t->tm_min,'-', t->tm_sec,".xls");
+            printf("%s\n",data);
+            datafilename = data;
 
-        col = 0;
-        row = 2;
-        second = 1;
-        xf = wb.xformat();
-        ws = wb.sheet("sheet1");
+            col = 0;
+            row = 2;
+            second = 1;
+            xf = wb.xformat();
+            ws = wb.sheet("sheet1");
 
-        string time = "时间 秒";
+            string time = "时间 秒";
             string label = "1st单位：阻抗欧姆";
             string label1 = "1st单位：℃ 针尖";
             string label2 = "1st单位：℃ 粘膜";
@@ -2119,32 +2183,58 @@ void mdmedical::DetectKey()
 
 
 
-                ws->label(1,0,time,xf);
+            ws->label(1,0,time,xf);
 
-                ws->label(1,1,channel1,xf);
-                ws->label(1,2,channel2,xf);
-                ws->label(1,3,channel3,xf);
-                ws->label(1,4,channel4,xf);
+            ws->label(1,1,channel1,xf);
+            ws->label(1,2,channel2,xf);
+            ws->label(1,3,channel3,xf);
+            ws->label(1,4,channel4,xf);
 
-                ws->label(1,5,channel1,xf);
-                ws->label(1,6,channel2,xf);
-                ws->label(1,7,channel3,xf);
-                ws->label(1,8,channel4,xf);
+            ws->label(1,5,channel1,xf);
+            ws->label(1,6,channel2,xf);
+            ws->label(1,7,channel3,xf);
+            ws->label(1,8,channel4,xf);
 
-                ws->label(1,9,channel1,xf);
-                ws->label(1,10,channel2,xf);
-                ws->label(1,11,channel3,xf);
-                ws->label(1,12,channel4,xf);
+            ws->label(1,9,channel1,xf);
+            ws->label(1,10,channel2,xf);
+            ws->label(1,11,channel3,xf);
+            ws->label(1,12,channel4,xf);
 
 
+         }
+        else
+        {
+            g_bFootKeyHide = true;
+            g_bFootKey = false;
+
+            m_pQTimer_writedata->stop();
+            wb.Dump(datafilename);
+        }
     }
-    else if(g_bFootKey && m_pQTimer_showgraph->isActive())
+    else if(g_cWhichKey == 3)
     {
-        g_bFootKeyHide = true;
-        g_bFootKey = false;
+        g_cWhichKey = 0;
+        if(g_bIsCreateAdcDetectpthread)
+        {
+            g_bIsCreateAdcDetectpthread = false;
+            g_bisGatheringAdcValue = true;
 
-        m_pQTimer_writedata->stop();
-        wb.Dump(datafilename);
+            pthread_t tid = -1;
+             int ret = pthread_create(&tid,NULL,deteAdcValve,NULL);
+             if(ret == -1)
+             {
+                 printf("create deteAdcValve pthread failed!\n");
+             }
+             else
+             {
+                 pthread_detach(tid);
+             }
+        }
+    }
+    else if(g_cWhichKey == 4)
+    {
+        g_cWhichKey = 0;
+        g_bisBreakGas = true;
     }
 }
 char version[64];
@@ -2160,7 +2250,7 @@ void mdmedical::on_pushButton_calibrate_clicked()
             return;
         }
         fscanf(pfile,"%s",version);
-        fclose(pfile);;
+        fclose(pfile);
 
         g_bupdatestatus = true;
         if(SearchFirmwareName("/udisk","USMART.bin"))
@@ -2418,8 +2508,8 @@ void mdmedical::ShowUpdateStr()
         mymanagerdialog->label->setText(g_version);
         g_bisUpdatesuccess = false;
         QMessageBox::information(this,"update window",QString::fromUtf8("更新完成"));
-        if(m_pShowUpdateFinished->isActive())
-            m_pShowUpdateFinished->stop();
+        if(m_pQTimerShowUpdateFinished->isActive())
+            m_pQTimerShowUpdateFinished->stop();
     }
 
     static int i =0 ;
@@ -2552,8 +2642,8 @@ void mdmedical::RecordTempture()
 
     if(count == 60)
     {
-        if(m_pRecordTempture->isActive())
-            m_pRecordTempture->stop();
+        if(m_pQTimerRecordTempture->isActive())
+            m_pQTimerRecordTempture->stop();
 
         printf("create file finished!\n");
         wb.Dump("datafilename_tempture.xls");
@@ -2563,29 +2653,19 @@ void mdmedical::RecordTempture()
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+void mdmedical::FlushShowInfo()
+{
+    ui->label_zlzq->setText(mymapperiod.value(surrentstatusvalue.cureCycle));
+    ui->label_tagetTmp->setText(mymaptemp.value(surrentstatusvalue.targetTmp));
+    ui->label_Max->setText(mymappower.value(surrentstatusvalue.maxPower));
+    ui->label_coldwaterstream->setText(mymapwater.value(surrentstatusvalue.curePos));
+    if(g_isSetting)
+    {
+        if(m_pQTimerFlushShowInfo->isActive())
+            m_pQTimerFlushShowInfo->stop();
+        g_isSetting = false;
+    }
+}
 
 
 
@@ -2781,3 +2861,18 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 
 
 
+
+void mdmedical::on_pushButton_setting_clicked()
+{
+    m_pQTimerFlushShowInfo->start(1000);
+    mysetpage->showFullScreen();
+    mysetpage->show();
+}
+
+void mdmedical::on_pushButton_systeminfo_clicked()
+{
+    systeminfo->setWindowTitle("系统信息");
+    systeminfo->setModal(true);
+    systeminfo->setWindowFlags(Qt::Window);
+    systeminfo->showFullScreen();
+}

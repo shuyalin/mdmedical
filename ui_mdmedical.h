@@ -13,6 +13,7 @@
 #include <QtWidgets/QAction>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
 #include <QtWidgets/QPushButton>
@@ -32,7 +33,6 @@ public:
     QLabel *label_impedance3;
     QLabel *label_showcurtime;
     QLabel *label_tagetTmp;
-    QLabel *label_tdxz;
     QLabel *label_tmp1;
     QLabel *label_tmp2;
     QLabel *label_tmp3;
@@ -41,7 +41,6 @@ public:
     QLabel *label_tmp6;
     QLabel *label_tmp7;
     QLabel *label_tmp8;
-    QLabel *label_zlwz;
     QLabel *label_zlzq;
     QPushButton *pushButton_addgas;
     QPushButton *pushButton_losegas;
@@ -55,7 +54,18 @@ public:
     QPushButton *pushButton_showcam;
     QPushButton *pushButton_takephoto;
     QPushButton *pushButton_closecam;
-    QWidget *widget;
+    QPushButton *pushButton_setting;
+    QLabel *label_zlzqIcon;
+    QLabel *label_tagetIcon;
+    QLabel *label_MaxIcon;
+    QLabel *label_coldwaterstream;
+    QLabel *label_coldwaterstreamIcon;
+    QGroupBox *groupBox_zlzq;
+    QGroupBox *groupBox_tagetTmp;
+    QGroupBox *groupBox_Max;
+    QGroupBox *groupBox_coldwaterstream;
+    QGroupBox *groupBox_channelselect;
+    QPushButton *pushButton_systeminfo;
 
     void setupUi(QWidget *mdmedical)
     {
@@ -89,9 +99,6 @@ public:
         label_tagetTmp = new QLabel(mdmedical);
         label_tagetTmp->setObjectName(QStringLiteral("label_tagetTmp"));
         label_tagetTmp->setGeometry(QRect(210, 20, 67, 17));
-        label_tdxz = new QLabel(mdmedical);
-        label_tdxz->setObjectName(QStringLiteral("label_tdxz"));
-        label_tdxz->setGeometry(QRect(280, 20, 67, 17));
         label_tmp1 = new QLabel(mdmedical);
         label_tmp1->setObjectName(QStringLiteral("label_tmp1"));
         label_tmp1->setGeometry(QRect(0, 40, 67, 17));
@@ -116,9 +123,6 @@ public:
         label_tmp8 = new QLabel(mdmedical);
         label_tmp8->setObjectName(QStringLiteral("label_tmp8"));
         label_tmp8->setGeometry(QRect(210, 60, 67, 17));
-        label_zlwz = new QLabel(mdmedical);
-        label_zlwz->setObjectName(QStringLiteral("label_zlwz"));
-        label_zlwz->setGeometry(QRect(280, 60, 67, 17));
         label_zlzq = new QLabel(mdmedical);
         label_zlzq->setObjectName(QStringLiteral("label_zlzq"));
         label_zlzq->setGeometry(QRect(70, 60, 67, 17));
@@ -158,9 +162,42 @@ public:
         pushButton_closecam = new QPushButton(mdmedical);
         pushButton_closecam->setObjectName(QStringLiteral("pushButton_closecam"));
         pushButton_closecam->setGeometry(QRect(150, 140, 41, 21));
-        widget = new QWidget(mdmedical);
-        widget->setObjectName(QStringLiteral("widget"));
-        widget->setGeometry(QRect(20, 260, 31, 20));
+        pushButton_setting = new QPushButton(mdmedical);
+        pushButton_setting->setObjectName(QStringLiteral("pushButton_setting"));
+        pushButton_setting->setGeometry(QRect(0, 170, 51, 21));
+        label_zlzqIcon = new QLabel(mdmedical);
+        label_zlzqIcon->setObjectName(QStringLiteral("label_zlzqIcon"));
+        label_zlzqIcon->setGeometry(QRect(0, 190, 31, 16));
+        label_tagetIcon = new QLabel(mdmedical);
+        label_tagetIcon->setObjectName(QStringLiteral("label_tagetIcon"));
+        label_tagetIcon->setGeometry(QRect(0, 210, 31, 16));
+        label_MaxIcon = new QLabel(mdmedical);
+        label_MaxIcon->setObjectName(QStringLiteral("label_MaxIcon"));
+        label_MaxIcon->setGeometry(QRect(0, 230, 31, 16));
+        label_coldwaterstream = new QLabel(mdmedical);
+        label_coldwaterstream->setObjectName(QStringLiteral("label_coldwaterstream"));
+        label_coldwaterstream->setGeometry(QRect(60, 170, 41, 21));
+        label_coldwaterstreamIcon = new QLabel(mdmedical);
+        label_coldwaterstreamIcon->setObjectName(QStringLiteral("label_coldwaterstreamIcon"));
+        label_coldwaterstreamIcon->setGeometry(QRect(110, 170, 41, 16));
+        groupBox_zlzq = new QGroupBox(mdmedical);
+        groupBox_zlzq->setObjectName(QStringLiteral("groupBox_zlzq"));
+        groupBox_zlzq->setGeometry(QRect(60, 190, 41, 16));
+        groupBox_tagetTmp = new QGroupBox(mdmedical);
+        groupBox_tagetTmp->setObjectName(QStringLiteral("groupBox_tagetTmp"));
+        groupBox_tagetTmp->setGeometry(QRect(60, 210, 41, 16));
+        groupBox_Max = new QGroupBox(mdmedical);
+        groupBox_Max->setObjectName(QStringLiteral("groupBox_Max"));
+        groupBox_Max->setGeometry(QRect(60, 230, 41, 16));
+        groupBox_coldwaterstream = new QGroupBox(mdmedical);
+        groupBox_coldwaterstream->setObjectName(QStringLiteral("groupBox_coldwaterstream"));
+        groupBox_coldwaterstream->setGeometry(QRect(110, 190, 41, 16));
+        groupBox_channelselect = new QGroupBox(mdmedical);
+        groupBox_channelselect->setObjectName(QStringLiteral("groupBox_channelselect"));
+        groupBox_channelselect->setGeometry(QRect(110, 210, 41, 21));
+        pushButton_systeminfo = new QPushButton(mdmedical);
+        pushButton_systeminfo->setObjectName(QStringLiteral("pushButton_systeminfo"));
+        pushButton_systeminfo->setGeometry(QRect(160, 170, 31, 21));
 
         retranslateUi(mdmedical);
 
@@ -179,7 +216,6 @@ public:
         label_impedance3->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         label_showcurtime->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         label_tagetTmp->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
-        label_tdxz->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         label_tmp1->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         label_tmp2->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         label_tmp3->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
@@ -188,7 +224,6 @@ public:
         label_tmp6->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         label_tmp7->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         label_tmp8->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
-        label_zlwz->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         label_zlzq->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         pushButton_addgas->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_losegas->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
@@ -202,6 +237,18 @@ public:
         pushButton_showcam->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_takephoto->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_closecam->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
+        pushButton_setting->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
+        label_zlzqIcon->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
+        label_tagetIcon->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
+        label_MaxIcon->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
+        label_coldwaterstream->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
+        label_coldwaterstreamIcon->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
+        groupBox_zlzq->setTitle(QApplication::translate("mdmedical", "GroupBox", Q_NULLPTR));
+        groupBox_tagetTmp->setTitle(QApplication::translate("mdmedical", "GroupBox", Q_NULLPTR));
+        groupBox_Max->setTitle(QApplication::translate("mdmedical", "GroupBox", Q_NULLPTR));
+        groupBox_coldwaterstream->setTitle(QApplication::translate("mdmedical", "GroupBox", Q_NULLPTR));
+        groupBox_channelselect->setTitle(QApplication::translate("mdmedical", "GroupBox", Q_NULLPTR));
+        pushButton_systeminfo->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
     } // retranslateUi
 
 };

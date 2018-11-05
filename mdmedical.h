@@ -44,6 +44,9 @@
 #include "serial.h"
 #include "cam.h"
 #include "managerdialog.h"
+#include "ui_settingdialog.h"
+#include "settingpage.h"
+#include "systeminfo.h"
 
 #include "xlslib.h"
 
@@ -52,6 +55,8 @@ using namespace std;
 
 #define RES_POS "/mnt/mdmedical1/res/Background/"
 //#define RES_POS "/opt/res/Background/"
+
+#define MAINPAGE "/mnt/mdmedical1/res/MAINPAGE/"
 
 #define SERIAL0 "/dev/ttyS0"
 #define SERIAL1 "/dev/ttyS1"
@@ -85,15 +90,15 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
         }\
     }while(0);
 
-typedef struct CCurrentInfo
-{
-     int cureCycle = 0;
-     int targetTmp  = 50;
-     int maxPower  = 0;
-     int curePos  = 0;
-     int chanel  = 1;
+//typedef struct CCurrentInfo
+//{
+//     int cureCycle = 0;
+//     int targetTmp  = 50;
+//     int maxPower  = 0;
+//     int curePos  = 0;
+//     int chanel  = 1;
 
-}CCUREINFORMATION;
+//}CCUREINFORMATION;
 
 
 namespace Ui {
@@ -109,15 +114,12 @@ public:
     ~mdmedical();
 
 
-    void InitCureReriodSubWidgets();
-    void InitTargetTempSubWidgets();
-    void InitMaxPowerSubWidgets();
-    void InitCurePosSubWidgets();
     void ShowLeftCureTime();
     bool SearchFirmwareName(const char *basePath,const char *filename);
     bool CopyFile(QString src, QString dst);
     //void StopSound();
     //void PlaySound(QString soundpath);
+    void InitMapValue();
 
 private:
     QTimer *m_pQTimer_showtime;
@@ -133,8 +135,9 @@ private:
     QTimer *m_pQTimer_showpowerrate4;
     QTimer *m_pQTimer_showcam;
     QTimer *m_pQTimer_writedata;
-    QTimer *m_pShowUpdateFinished;
-    QTimer *m_pRecordTempture;
+    QTimer *m_pQTimerShowUpdateFinished;
+    QTimer *m_pQTimerRecordTempture;
+    QTimer *m_pQTimerFlushShowInfo;
 
 
     QCustomPlot *widget;
@@ -151,19 +154,12 @@ private:
     xf_t* xf;
     cell_t * cell;
     //CSerial selOperation;
-    CCUREINFORMATION originalInfo;
+    //CCUREINFORMATION originalInfo;
 
     QProgressBar *progressBar1;
     QProgressBar *progressBar2;
     QProgressBar *progressBar3;
     QProgressBar *progressBar4;
-
-
-    QComboBox  *m_QComboBox_cureperiod;
-    QComboBox  *m_QComboBox_targettemp;
-    QComboBox  *m_QComboBox_maxpower;
-    QComboBox  *m_QComboBox_curepos;
-
 
     QPushButton *m_QPushButton_on_off;
     QPushButton *m_switch_up;
@@ -178,6 +174,7 @@ private:
     QString lefttime;
 
     QDialog *managerdialog;
+    QDialog *systeminfo;
 
     int m_plot_i;
     int m_calibate_count;
@@ -188,7 +185,8 @@ private:
     bool istakephoto;
     bool isclosecam;
     bool m_bIsExistFirmware;
-
+    bool m_isShowGreen;
+    bool m_isShowRed;
     unsigned char *jpeg_buf = NULL;
     string datafilename;
 public slots:
@@ -206,17 +204,19 @@ public slots:
     void Updata();
     void CopyData();
     void ExitManagerPage();
+    void ExitSystemInfoPage();
     void CopyUserData();
+    void FlushShowInfo();
 
 private slots:
-   void GetCureCycleCurrentValue();
-   void GetTargetTmpCurrentValue();
-   void GetMaxPowerCurrentValue();
-   void GetCurePosCurrentValue();
-   void GetChanel1Value();
-   void GetChanel2Value();
-   void GetChanel3Value();
-   void GetChanel4Value();
+//   void GetCureCycleCurrentValue();
+//   void GetTargetTmpCurrentValue();
+//   void GetMaxPowerCurrentValue();
+//   void GetCurePosCurrentValue();
+//   void GetChanel1Value();
+//   void GetChanel2Value();
+//   void GetChanel3Value();
+//   void GetChanel4Value();
    void DetectKey();
    void DetectCalibrate();
    void ShowPowerRate();
@@ -238,12 +238,20 @@ private slots:
 
    void on_pushButton_closecam_clicked();
 
+   void on_pushButton_setting_clicked();
+
+   void on_pushButton_systeminfo_clicked();
+
 private:
     Ui::mdmedical *ui;
+
+    QMap<int,QString> mymapperiod,mymaptemp,mymappower,mymapwater;
 
     Opera_Cam ope;
     QImage image;
     Ui_ManagerDialog *mymanagerdialog;
+    CSettingPage *mysetpage;
+    Ui_SystemInfo *mysysteminfo;
 
 };
 

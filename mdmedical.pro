@@ -18,16 +18,19 @@ SOURCES += main.cpp\
     qcustomplot.cpp \
     serial.cpp \
     cam.cpp \
-    managerdialog.cpp
+    settingpage.cpp
 
 HEADERS  += mdmedical.h \
     qcustomplot.h \
     serial.h \
     cam.h \
     managerdialog.h \
+    settingpage.h \
+    systeminfo.h
 
 
 FORMS    += mdmedical.ui \
-    managerdialog.ui
+    managerdialog.ui \
+    systeminfo.ui
 
 LIBS += -L /home/root/mdworkdir/xlslib_arm/xlslib/tmp/lib/  -lxls

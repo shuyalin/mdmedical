@@ -279,7 +279,7 @@ bool CSerial::SendData()
 {
 	tcflush(m_fd, TCIOFLUSH);
 
-    int j;
+    //int j;
 #if 0
     char k;
     printf("senddata is : ");
@@ -301,11 +301,11 @@ bool CSerial::SendData()
 	return true;
 }
 
-bool CSerial::RecvData()
+int CSerial::RecvData()
 {
 	
 	struct timeval tv;	
-    int i=0,j;
+    int i=0;
 	fd_set rdfds; 
 	int maxfd = -1;
 	int ret;
@@ -330,13 +330,12 @@ bool CSerial::RecvData()
 		ret = select(maxfd + 1, &rdfds, NULL, NULL, &tv);
 		if(ret < 0)
 		{
-			perror("Select fail\n");
-			return false;
+            return -1;
 		}
 		else if(ret == 0)
 		{
             printf("%s  receve data timeout!\n",serialname);
-            break;
+            return -2;
 		}
 		else
 		{  
@@ -355,11 +354,11 @@ bool CSerial::RecvData()
 #endif
 				memcpy(m_recvdata,buff,i);
 				fflush(stdout);
-				break;
+                return 0;
 			}
 		}
 	}
-	return true;
+
 }
 
 
@@ -410,16 +409,20 @@ bool CSerial::ParseRecvData(unsigned char command)
 }
 
 //??????????????????
-void CSerial::GetRealDataField()
+bool CSerial::GetRealDataField()
 {
 	realDataFiled.p_datafiled = NULL;
     realDataFiled.datalen = m_recvdata[2] - 1;
     if(realDataFiled.datalen != 0)
     {
         realDataFiled.p_datafiled = (char *)malloc(sizeof(char)*realDataFiled.datalen);
-        memcpy(realDataFiled.p_datafiled,&m_recvdata[4],realDataFiled.datalen);
+        if(realDataFiled.p_datafiled)
+            memcpy(realDataFiled.p_datafiled,&m_recvdata[4],realDataFiled.datalen);
+        else
+            return false;
     }
     realDataFiled.returnstatus = m_recvdata[3];
+    return true;
 }
 
 
@@ -834,7 +837,8 @@ bool CSerial::ParsePwmdSendReturnData()
 bool CSerial::ParseIdleSendReturnData()
 {
 
-    GetRealDataField();
+    if(!GetRealDataField())
+        return false;
     if(realDataFiled.p_datafiled)
         free(realDataFiled.p_datafiled);
     if(realDataFiled.returnstatus == 0x00)

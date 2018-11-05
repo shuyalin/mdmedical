@@ -119,11 +119,11 @@ class CSerial
 		
 		bool SendData();
 		
-		bool RecvData();
+        int RecvData();
 		
 		bool ParseRecvData(unsigned char command);
 		
-		void GetRealDataField();
+        bool GetRealDataField();
 		
 		bool ParseSetAddressReturnData();
 		
