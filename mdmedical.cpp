@@ -659,7 +659,7 @@ void *GetCurrTmp(__attribute__((unused))void *args)
         {
 
                     gettimeofday(&start,NULL);
-                    for(i=3;i<4;i++)
+                    for(i=3;i<7;i++)
                     {
                         //pthread_mutex_lock(&mutex);
                         g_cWhichChannel = i - 3;
@@ -675,6 +675,7 @@ void *GetCurrTmp(__attribute__((unused))void *args)
                             last = true;
                         else
                             last = false;
+#if 0
                         usleep(50);
                         read(fd,&g_iPipeStatus,4);
                         if(g_iPipeStatus)
@@ -688,6 +689,8 @@ void *GetCurrTmp(__attribute__((unused))void *args)
                         else
                             next = false;
                         if(last&&current&&next)
+#endif
+                         if(last)
                         {
                             g_bRecordChannelStatus[g_cWhichChannel] = true;
 
@@ -716,7 +719,7 @@ void *GetCurrTmp(__attribute__((unused))void *args)
                    //printf("chazhi is %d\n",end.tv_usec-start.tv_usec);
 
 #if 1
-                    for(i=3;i<4;i++)
+                    for(i=3;i<7;i++)
                     {
                         if(channel_mask[(i-3)/2])
                             continue;
@@ -729,7 +732,7 @@ void *GetCurrTmp(__attribute__((unused))void *args)
                             last = true;
                         else
                             last = false;
-
+#if 0
                         usleep(50);
                         read(fd,&g_iPipeStatus,4);
                         if(g_iPipeStatus)
@@ -742,7 +745,10 @@ void *GetCurrTmp(__attribute__((unused))void *args)
                             next = true;
                         else
                             next = false;
+
                         if(last&&current&&next)
+ #endif
+                        if(last)
                         {
                             g_bRecordChannelStatus[g_cWhichChannel] = true;
                         }
