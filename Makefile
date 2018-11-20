@@ -959,6 +959,7 @@ moc_mdmedical.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QGroupBox \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QVBoxLayout \
 		systeminfo.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/QFont \
 		xlslib.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlsys.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlconfig.h \
@@ -1616,6 +1617,8 @@ moc_settingpage.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/ar
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlayout.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlayoutitem.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qgridlayout.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QProcess \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qprocess.h \
 		settingpage.h \
 		moc_predefs.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/moc
@@ -2157,6 +2160,7 @@ main.o: main.cpp mdmedical.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QGroupBox \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QVBoxLayout \
 		systeminfo.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/QFont \
 		xlslib.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlsys.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlconfig.h \
@@ -2697,6 +2701,7 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QGroupBox \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QVBoxLayout \
 		systeminfo.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/QFont \
 		xlslib.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlsys.h \
 		../xlslib_arm/xlslib/tmp/include/common/xlconfig.h \
@@ -3406,7 +3411,9 @@ settingpage.o: settingpage.cpp settingpage.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qboxlayout.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlayout.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlayoutitem.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qgridlayout.h
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qgridlayout.h \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QProcess \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qprocess.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o settingpage.o settingpage.cpp
 
 moc_mdmedical.o: moc_mdmedical.cpp 

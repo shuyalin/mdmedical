@@ -44,10 +44,6 @@ public:
     QLabel *label_zlzq;
     QPushButton *pushButton_addgas;
     QPushButton *pushButton_losegas;
-    QPushButton *pushButton_td1;
-    QPushButton *pushButton_td3;
-    QPushButton *pushButton_td2;
-    QPushButton *pushButton_td4;
     QPushButton *pushButton_waitmode;
     QPushButton *pushButton_calibrate;
     QLabel *label_showcam;
@@ -64,7 +60,6 @@ public:
     QGroupBox *groupBox_tagetTmp;
     QGroupBox *groupBox_Max;
     QGroupBox *groupBox_coldwaterstream;
-    QGroupBox *groupBox_channelselect;
     QPushButton *pushButton_systeminfo;
 
     void setupUi(QWidget *mdmedical)
@@ -132,18 +127,6 @@ public:
         pushButton_losegas = new QPushButton(mdmedical);
         pushButton_losegas->setObjectName(QStringLiteral("pushButton_losegas"));
         pushButton_losegas->setGeometry(QRect(100, 90, 61, 27));
-        pushButton_td1 = new QPushButton(mdmedical);
-        pushButton_td1->setObjectName(QStringLiteral("pushButton_td1"));
-        pushButton_td1->setGeometry(QRect(160, 90, 51, 27));
-        pushButton_td3 = new QPushButton(mdmedical);
-        pushButton_td3->setObjectName(QStringLiteral("pushButton_td3"));
-        pushButton_td3->setGeometry(QRect(210, 90, 51, 27));
-        pushButton_td2 = new QPushButton(mdmedical);
-        pushButton_td2->setObjectName(QStringLiteral("pushButton_td2"));
-        pushButton_td2->setGeometry(QRect(260, 90, 51, 27));
-        pushButton_td4 = new QPushButton(mdmedical);
-        pushButton_td4->setObjectName(QStringLiteral("pushButton_td4"));
-        pushButton_td4->setGeometry(QRect(310, 90, 61, 27));
         pushButton_waitmode = new QPushButton(mdmedical);
         pushButton_waitmode->setObjectName(QStringLiteral("pushButton_waitmode"));
         pushButton_waitmode->setGeometry(QRect(280, 130, 41, 21));
@@ -192,9 +175,6 @@ public:
         groupBox_coldwaterstream = new QGroupBox(mdmedical);
         groupBox_coldwaterstream->setObjectName(QStringLiteral("groupBox_coldwaterstream"));
         groupBox_coldwaterstream->setGeometry(QRect(110, 190, 41, 16));
-        groupBox_channelselect = new QGroupBox(mdmedical);
-        groupBox_channelselect->setObjectName(QStringLiteral("groupBox_channelselect"));
-        groupBox_channelselect->setGeometry(QRect(110, 210, 41, 21));
         pushButton_systeminfo = new QPushButton(mdmedical);
         pushButton_systeminfo->setObjectName(QStringLiteral("pushButton_systeminfo"));
         pushButton_systeminfo->setGeometry(QRect(160, 170, 31, 21));
@@ -227,10 +207,6 @@ public:
         label_zlzq->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
         pushButton_addgas->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_losegas->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
-        pushButton_td1->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
-        pushButton_td3->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
-        pushButton_td2->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
-        pushButton_td4->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_waitmode->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         pushButton_calibrate->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
         label_showcam->setText(QApplication::translate("mdmedical", "TextLabel", Q_NULLPTR));
@@ -247,7 +223,6 @@ public:
         groupBox_tagetTmp->setTitle(QApplication::translate("mdmedical", "GroupBox", Q_NULLPTR));
         groupBox_Max->setTitle(QApplication::translate("mdmedical", "GroupBox", Q_NULLPTR));
         groupBox_coldwaterstream->setTitle(QApplication::translate("mdmedical", "GroupBox", Q_NULLPTR));
-        groupBox_channelselect->setTitle(QApplication::translate("mdmedical", "GroupBox", Q_NULLPTR));
         pushButton_systeminfo->setText(QApplication::translate("mdmedical", "PushButton", Q_NULLPTR));
     } // retranslateUi
 

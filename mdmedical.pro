@@ -13,6 +13,7 @@ TEMPLATE = app
 
 INCLUDEPATH += /home/root/mdworkdir/xlslib_arm/xlslib/tmp/include/ \
 
+
 SOURCES += main.cpp\
         mdmedical.cpp \
     qcustomplot.cpp \

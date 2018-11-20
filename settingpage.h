@@ -16,7 +16,17 @@
 #include <QComboBox>
 #include <QGroupBox>
 #include <QVBoxLayout>
+#include <QProcess>
 
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <linux/rtc.h>
+#include <linux/capability.h>
 
 #define SETTINGPAGE "/mnt/mdmedical1/res/SETTINGPAGE/"
 #define SETTINBACKGROUND "/mnt/mdmedical1/res/Background/"
@@ -30,6 +40,15 @@ typedef struct CCurrentstatusvalue
 }CCURRENTSTATUSVALUE;
 #endif
 
+typedef struct CCurrentdatetime
+{
+     int year = 0;
+     int   month = 0;
+     int day  = 0;
+     int hour  = 0;
+     int minute = 0;
+     int second = 0;
+}CCURRENTDATETIME;
 
 
 class CSettingPage : public QWidget
@@ -39,7 +58,15 @@ public:
     explicit CSettingPage(QWidget *parent = 0);
     ~CSettingPage();
 
+
+    char *datetime;
+
     void initQComboBox();
+
+    char * transdatetimetostr();
+
+    /*这一段是仿busybox设置linux时钟的api*/
+
 
 
 private slots:
@@ -48,8 +75,19 @@ private slots:
     void GetMaxPowerCurrentValue();
     void GetCurePosCurrentValue();
 
+    void GetYearValue();
+    void GetMonthValue();
+    void GetDayValue();
+    void GetHourValue();
+    void GetMinuteValue();
+
+
     void CloseSettingPage();
     void CloseSettingOkPage();
+
+
+
+
 
 private:
 #if 1
@@ -74,14 +112,22 @@ private:
     QComboBox *m_box_curePowerSet;
     QComboBox *m_box_coldWaterSet;
 
-    QLabel *date;
+    QComboBox *m_box_year;
+    QComboBox *m_box_month;
+    QComboBox *m_box_day;
+    QComboBox *m_box_hour;
+    QComboBox *m_box_minute;
+
+    QLabel *setdatetime;
+    #if 0
     QLabel *time;
     QLabel *year;
     QLabel *month;
     QLabel *day;
     QLabel *hour;
     QLabel *minute;
-
+#endif
+#if 0
     QPushButton  *year_up;
     QPushButton   *year_down;
     QPushButton  *month_up;
@@ -92,8 +138,12 @@ private:
     QPushButton   *hour_down;
     QPushButton  *minute_up;
     QPushButton   *minute_down;
+
+#endif
     QPushButton   *ok;
     QPushButton   *cancel;
+
+
 
 
 

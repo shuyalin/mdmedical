@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_mdmedical_t {
-    QByteArrayData data[32];
-    char stringdata0[548];
+    QByteArrayData data[37];
+    char stringdata0[621];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -49,20 +49,25 @@ QT_MOC_LITERAL(14, 180, 15), // "ExitManagerPage"
 QT_MOC_LITERAL(15, 196, 18), // "ExitSystemInfoPage"
 QT_MOC_LITERAL(16, 215, 12), // "CopyUserData"
 QT_MOC_LITERAL(17, 228, 13), // "FlushShowInfo"
-QT_MOC_LITERAL(18, 242, 9), // "DetectKey"
-QT_MOC_LITERAL(19, 252, 15), // "DetectCalibrate"
-QT_MOC_LITERAL(20, 268, 13), // "ShowPowerRate"
-QT_MOC_LITERAL(21, 282, 7), // "ShowCam"
-QT_MOC_LITERAL(22, 290, 9), // "WriteData"
-QT_MOC_LITERAL(23, 300, 13), // "ShowUpdateStr"
-QT_MOC_LITERAL(24, 314, 14), // "RecordTempture"
-QT_MOC_LITERAL(25, 329, 30), // "on_pushButton_waitmode_clicked"
-QT_MOC_LITERAL(26, 360, 31), // "on_pushButton_calibrate_clicked"
-QT_MOC_LITERAL(27, 392, 29), // "on_pushButton_showcam_clicked"
-QT_MOC_LITERAL(28, 422, 31), // "on_pushButton_takephoto_clicked"
-QT_MOC_LITERAL(29, 454, 30), // "on_pushButton_closecam_clicked"
-QT_MOC_LITERAL(30, 485, 29), // "on_pushButton_setting_clicked"
-QT_MOC_LITERAL(31, 515, 32) // "on_pushButton_systeminfo_clicked"
+QT_MOC_LITERAL(18, 242, 8), // "NextStep"
+QT_MOC_LITERAL(19, 251, 15), // "GetChanel1Value"
+QT_MOC_LITERAL(20, 267, 15), // "GetChanel2Value"
+QT_MOC_LITERAL(21, 283, 15), // "GetChanel3Value"
+QT_MOC_LITERAL(22, 299, 15), // "GetChanel4Value"
+QT_MOC_LITERAL(23, 315, 9), // "DetectKey"
+QT_MOC_LITERAL(24, 325, 15), // "DetectCalibrate"
+QT_MOC_LITERAL(25, 341, 13), // "ShowPowerRate"
+QT_MOC_LITERAL(26, 355, 7), // "ShowCam"
+QT_MOC_LITERAL(27, 363, 9), // "WriteData"
+QT_MOC_LITERAL(28, 373, 13), // "ShowUpdateStr"
+QT_MOC_LITERAL(29, 387, 14), // "RecordTempture"
+QT_MOC_LITERAL(30, 402, 30), // "on_pushButton_waitmode_clicked"
+QT_MOC_LITERAL(31, 433, 31), // "on_pushButton_calibrate_clicked"
+QT_MOC_LITERAL(32, 465, 29), // "on_pushButton_showcam_clicked"
+QT_MOC_LITERAL(33, 495, 31), // "on_pushButton_takephoto_clicked"
+QT_MOC_LITERAL(34, 527, 30), // "on_pushButton_closecam_clicked"
+QT_MOC_LITERAL(35, 558, 29), // "on_pushButton_setting_clicked"
+QT_MOC_LITERAL(36, 588, 32) // "on_pushButton_systeminfo_clicked"
 
     },
     "mdmedical\0ShowTimeCurrent\0\0makeGraph\0"
@@ -71,10 +76,12 @@ QT_MOC_LITERAL(31, 515, 32) // "on_pushButton_systeminfo_clicked"
     "ShowCurrentTmp\0showCurrentImpedance\0"
     "ChangePrepareStatus\0TsModify\0Updata\0"
     "CopyData\0ExitManagerPage\0ExitSystemInfoPage\0"
-    "CopyUserData\0FlushShowInfo\0DetectKey\0"
-    "DetectCalibrate\0ShowPowerRate\0ShowCam\0"
-    "WriteData\0ShowUpdateStr\0RecordTempture\0"
-    "on_pushButton_waitmode_clicked\0"
+    "CopyUserData\0FlushShowInfo\0NextStep\0"
+    "GetChanel1Value\0GetChanel2Value\0"
+    "GetChanel3Value\0GetChanel4Value\0"
+    "DetectKey\0DetectCalibrate\0ShowPowerRate\0"
+    "ShowCam\0WriteData\0ShowUpdateStr\0"
+    "RecordTempture\0on_pushButton_waitmode_clicked\0"
     "on_pushButton_calibrate_clicked\0"
     "on_pushButton_showcam_clicked\0"
     "on_pushButton_takephoto_clicked\0"
@@ -90,7 +97,7 @@ static const uint qt_meta_data_mdmedical[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      30,   14, // methods
+      35,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -98,38 +105,48 @@ static const uint qt_meta_data_mdmedical[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,  164,    2, 0x0a /* Public */,
-       3,    0,  165,    2, 0x0a /* Public */,
-       4,    0,  166,    2, 0x0a /* Public */,
-       5,    0,  167,    2, 0x0a /* Public */,
-       6,    0,  168,    2, 0x0a /* Public */,
-       7,    0,  169,    2, 0x0a /* Public */,
-       8,    0,  170,    2, 0x0a /* Public */,
-       9,    0,  171,    2, 0x0a /* Public */,
-      10,    0,  172,    2, 0x0a /* Public */,
-      11,    0,  173,    2, 0x0a /* Public */,
-      12,    0,  174,    2, 0x0a /* Public */,
-      13,    0,  175,    2, 0x0a /* Public */,
-      14,    0,  176,    2, 0x0a /* Public */,
-      15,    0,  177,    2, 0x0a /* Public */,
-      16,    0,  178,    2, 0x0a /* Public */,
-      17,    0,  179,    2, 0x0a /* Public */,
-      18,    0,  180,    2, 0x08 /* Private */,
-      19,    0,  181,    2, 0x08 /* Private */,
-      20,    0,  182,    2, 0x08 /* Private */,
-      21,    0,  183,    2, 0x08 /* Private */,
-      22,    0,  184,    2, 0x08 /* Private */,
-      23,    0,  185,    2, 0x08 /* Private */,
-      24,    0,  186,    2, 0x08 /* Private */,
-      25,    0,  187,    2, 0x08 /* Private */,
-      26,    0,  188,    2, 0x08 /* Private */,
-      27,    0,  189,    2, 0x08 /* Private */,
-      28,    0,  190,    2, 0x08 /* Private */,
-      29,    0,  191,    2, 0x08 /* Private */,
-      30,    0,  192,    2, 0x08 /* Private */,
-      31,    0,  193,    2, 0x08 /* Private */,
+       1,    0,  189,    2, 0x0a /* Public */,
+       3,    0,  190,    2, 0x0a /* Public */,
+       4,    0,  191,    2, 0x0a /* Public */,
+       5,    0,  192,    2, 0x0a /* Public */,
+       6,    0,  193,    2, 0x0a /* Public */,
+       7,    0,  194,    2, 0x0a /* Public */,
+       8,    0,  195,    2, 0x0a /* Public */,
+       9,    0,  196,    2, 0x0a /* Public */,
+      10,    0,  197,    2, 0x0a /* Public */,
+      11,    0,  198,    2, 0x0a /* Public */,
+      12,    0,  199,    2, 0x0a /* Public */,
+      13,    0,  200,    2, 0x0a /* Public */,
+      14,    0,  201,    2, 0x0a /* Public */,
+      15,    0,  202,    2, 0x0a /* Public */,
+      16,    0,  203,    2, 0x0a /* Public */,
+      17,    0,  204,    2, 0x0a /* Public */,
+      18,    0,  205,    2, 0x0a /* Public */,
+      19,    0,  206,    2, 0x08 /* Private */,
+      20,    0,  207,    2, 0x08 /* Private */,
+      21,    0,  208,    2, 0x08 /* Private */,
+      22,    0,  209,    2, 0x08 /* Private */,
+      23,    0,  210,    2, 0x08 /* Private */,
+      24,    0,  211,    2, 0x08 /* Private */,
+      25,    0,  212,    2, 0x08 /* Private */,
+      26,    0,  213,    2, 0x08 /* Private */,
+      27,    0,  214,    2, 0x08 /* Private */,
+      28,    0,  215,    2, 0x08 /* Private */,
+      29,    0,  216,    2, 0x08 /* Private */,
+      30,    0,  217,    2, 0x08 /* Private */,
+      31,    0,  218,    2, 0x08 /* Private */,
+      32,    0,  219,    2, 0x08 /* Private */,
+      33,    0,  220,    2, 0x08 /* Private */,
+      34,    0,  221,    2, 0x08 /* Private */,
+      35,    0,  222,    2, 0x08 /* Private */,
+      36,    0,  223,    2, 0x08 /* Private */,
 
  // slots: parameters
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -186,20 +203,25 @@ void mdmedical::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         case 13: _t->ExitSystemInfoPage(); break;
         case 14: _t->CopyUserData(); break;
         case 15: _t->FlushShowInfo(); break;
-        case 16: _t->DetectKey(); break;
-        case 17: _t->DetectCalibrate(); break;
-        case 18: _t->ShowPowerRate(); break;
-        case 19: _t->ShowCam(); break;
-        case 20: _t->WriteData(); break;
-        case 21: _t->ShowUpdateStr(); break;
-        case 22: _t->RecordTempture(); break;
-        case 23: _t->on_pushButton_waitmode_clicked(); break;
-        case 24: _t->on_pushButton_calibrate_clicked(); break;
-        case 25: _t->on_pushButton_showcam_clicked(); break;
-        case 26: _t->on_pushButton_takephoto_clicked(); break;
-        case 27: _t->on_pushButton_closecam_clicked(); break;
-        case 28: _t->on_pushButton_setting_clicked(); break;
-        case 29: _t->on_pushButton_systeminfo_clicked(); break;
+        case 16: _t->NextStep(); break;
+        case 17: _t->GetChanel1Value(); break;
+        case 18: _t->GetChanel2Value(); break;
+        case 19: _t->GetChanel3Value(); break;
+        case 20: _t->GetChanel4Value(); break;
+        case 21: _t->DetectKey(); break;
+        case 22: _t->DetectCalibrate(); break;
+        case 23: _t->ShowPowerRate(); break;
+        case 24: _t->ShowCam(); break;
+        case 25: _t->WriteData(); break;
+        case 26: _t->ShowUpdateStr(); break;
+        case 27: _t->RecordTempture(); break;
+        case 28: _t->on_pushButton_waitmode_clicked(); break;
+        case 29: _t->on_pushButton_calibrate_clicked(); break;
+        case 30: _t->on_pushButton_showcam_clicked(); break;
+        case 31: _t->on_pushButton_takephoto_clicked(); break;
+        case 32: _t->on_pushButton_closecam_clicked(); break;
+        case 33: _t->on_pushButton_setting_clicked(); break;
+        case 34: _t->on_pushButton_systeminfo_clicked(); break;
         default: ;
         }
     }
@@ -231,13 +253,13 @@ int mdmedical::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 30)
+        if (_id < 35)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 30;
+        _id -= 35;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 30)
+        if (_id < 35)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 30;
+        _id -= 35;
     }
     return _id;
 }

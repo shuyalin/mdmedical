@@ -113,7 +113,7 @@ public:
     explicit mdmedical(QWidget *parent = 0);
     ~mdmedical();
 
-
+    void MainStep();
     void ShowLeftCureTime();
     bool SearchFirmwareName(const char *basePath,const char *filename);
     bool CopyFile(QString src, QString dst);
@@ -164,10 +164,22 @@ private:
     QPushButton *m_QPushButton_on_off;
     QPushButton *m_switch_up;
     QPushButton *m_switch_down;
+
+    QPushButton *pushButton_td1;
+    QPushButton *pushButton_td2;
+    QPushButton *pushButton_td3;
+    QPushButton *pushButton_td4;
+
     QLabel *m_QLabel_streamspeed;
 
     QLabel *m_QLabel_pic1;
     QLabel *m_QLeftcureTime;
+
+    QLabel *m_QLabel_operationprompttitle;
+    QLabel *m_QLabel_operationpromp;
+    QPushButton *m_QPushButton_nextstep;
+
+    QGroupBox *groupBox_channelselect;
 
     QProcess *m_QProcess_calibration;
 
@@ -185,8 +197,6 @@ private:
     bool istakephoto;
     bool isclosecam;
     bool m_bIsExistFirmware;
-    bool m_isShowGreen;
-    bool m_isShowRed;
     unsigned char *jpeg_buf = NULL;
     string datafilename;
 public slots:
@@ -208,15 +218,17 @@ public slots:
     void CopyUserData();
     void FlushShowInfo();
 
+    void NextStep();
+
 private slots:
 //   void GetCureCycleCurrentValue();
 //   void GetTargetTmpCurrentValue();
 //   void GetMaxPowerCurrentValue();
 //   void GetCurePosCurrentValue();
-//   void GetChanel1Value();
-//   void GetChanel2Value();
-//   void GetChanel3Value();
-//   void GetChanel4Value();
+   void GetChanel1Value();
+   void GetChanel2Value();
+   void GetChanel3Value();
+   void GetChanel4Value();
    void DetectKey();
    void DetectCalibrate();
    void ShowPowerRate();
@@ -252,6 +264,7 @@ private:
     Ui_ManagerDialog *mymanagerdialog;
     CSettingPage *mysetpage;
     Ui_SystemInfo *mysysteminfo;
+    QWidget *promitwidget;
 
 };
 

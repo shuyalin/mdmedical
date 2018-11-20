@@ -5,8 +5,10 @@
 
 using namespace std;
 
+static const char *rtcname;
 
 CCURRENTSTATUSVALUE surrentstatusvalue;
+CCURRENTDATETIME currentdatetime;
 bool g_isSetting = false;
 
 static const char curePeriodValue[][8] = {"1:00","1:10","1:20","1:30","1:40","1:50","2:00","2:10","2:20","2:30","2:40",
@@ -31,12 +33,38 @@ static const char   cureWaterValue[][8] = {"25.0","25.5","26.0","26.5","27.0","2
 "58.0","58.5","59.0","59.5","60.0","60.5","61.0","61.5","62.0","62.5","63.0","63.5","64.0","64.5","65.0"};
 
 
+
+static const char aviableSelectRearValue[][8] = {"2018","2019","2020","2021","2022","2023","2024","2025","2026","2027",
+ "2028","2029","2030"};
+
+static const char aviableSelectMonthValue[][8] = {"01","02","03","04","05","06","07","08","09","10","11","12"};
+
+static const char aviableSelectDayValue[][8] = {"01","02","03","04","05","06","07","08","09","10",
+ "11","12","13","14","15","16","17","18","19","20,","21","22","23","24","25","26","27","28","29","30"};
+
+static const char aviableSelectHourValue[][8] = {"01","02","03","04","05","06","07","08","09","10",
+ "11","12","13","14","15","16","17","18","19","20","21","22","23","24"};
+
+static const char aviableSelectMinuteValue[][8] = {"00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17",
+ "18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41",
+"42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"};
+
+static const char aviableSelectSecondValue[][8] = {"00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17",
+ "18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41",
+"42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59"};
+
+
+int  SetSysDateAndTime(const char *time_str);
+void SetHWClockFromSysClock(int utc);
+static int  rtc_xopen(const char **default_rtc, int flags);
+static void write_rtc(time_t t, int utc);
+
 CSettingPage::CSettingPage(QWidget *parent) :
     QWidget(parent)
 {
 
 #if 1
-    m_groupbox_curePeriodSet = new QGroupBox(tr("period"),this);
+    m_groupbox_curePeriodSet = new QGroupBox(QString::fromUtf8("治疗周期设置（分)"),this);
     m_groupbox_curePeriodSet->setGeometry(10,10,200,200);
     m_label_curePeriodIcon = new QLabel(this);
     m_label_curePeriodIcon->setGeometry(20,40,30,30);
@@ -65,7 +93,7 @@ CSettingPage::CSettingPage(QWidget *parent) :
 
                       );
 
-    m_groupbox_cureTempSet = new QGroupBox(tr("temprate"),this);
+    m_groupbox_cureTempSet = new QGroupBox(QString::fromUtf8("治疗温度设置（℃）"),this);
     m_groupbox_cureTempSet->setGeometry(260,10,200,200);
     m_label_cureTempIcon = new QLabel(this);
     m_label_cureTempIcon->setGeometry(270,40,14,30);
@@ -95,7 +123,7 @@ CSettingPage::CSettingPage(QWidget *parent) :
                       );
 
 
-    m_groupbox_curePowerSet = new QGroupBox(tr("power"),this);
+    m_groupbox_curePowerSet = new QGroupBox(QString::fromUtf8("治疗功率设置（W）"),this);
     m_groupbox_curePowerSet->setGeometry(510,10,200,200);
     m_label_curePowerIcon = new QLabel(this);
     m_label_curePowerIcon->setGeometry(520,40,30,30);
@@ -124,7 +152,7 @@ CSettingPage::CSettingPage(QWidget *parent) :
                       );
 
 
-    m_groupbox_coldWaterSet = new QGroupBox(tr("water"),this);
+    m_groupbox_coldWaterSet = new QGroupBox(QString::fromUtf8("冷却液流量（毫升）"),this);
     m_groupbox_coldWaterSet->setGeometry(760,10,200,200);
     m_label_coldWaterIcon = new QLabel(this);
     m_label_coldWaterIcon->setGeometry(770,40,30,30);
@@ -152,19 +180,30 @@ CSettingPage::CSettingPage(QWidget *parent) :
 
                       );
 
+#if 1
+    setdatetime = new QLabel(this);
+    setdatetime->setGeometry(300,300,200,50);
+    setdatetime->setText(QString::fromUtf8("设置日期时间"));
+//    time = new QLabel(this);
+//    time->setGeometry(600,300,150,50);
+//    time->setText("current time");
 
+#endif
+    m_box_year = new QComboBox(this);
+    m_box_month = new QComboBox(this);
+    m_box_day = new QComboBox(this);
+    m_box_hour = new QComboBox(this);
+    m_box_minute = new QComboBox(this);
 
-    initQComboBox();
+    m_box_year->setGeometry(100,400,100,40);
+    m_box_month->setGeometry(250,400,100,40);
+    m_box_day->setGeometry(400,400,100,40);
+    m_box_hour->setGeometry(550,400,100,40);
+    m_box_minute->setGeometry(700,400,100,40);
 
+     initQComboBox();
 
-
-    date = new QLabel(this);
-    date->setGeometry(300,300,150,50);
-    date->setText("current date");
-    time = new QLabel(this);
-    time->setGeometry(600,300,150,50);
-    time->setText("current time");
-
+#if 0
     year = new QLabel(this);
     year->setGeometry(320,400,80,30);
     year->setText("year");
@@ -229,6 +268,9 @@ CSettingPage::CSettingPage(QWidget *parent) :
     minute_down->setIcon(QIcon(SETTINGPAGE"down.png"));
     minute_down->setIconSize(QSize(80,40));
 
+#endif
+
+
 
     ok = new QPushButton(this);
     ok->setGeometry(320,500,80,40);
@@ -247,6 +289,12 @@ CSettingPage::CSettingPage(QWidget *parent) :
     connect(m_box_cureTempSet, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetTargetTmpCurrentValue()));
     connect(m_box_curePowerSet, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetMaxPowerCurrentValue()));
     connect(m_box_coldWaterSet, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetCurePosCurrentValue()));
+
+    connect(m_box_year, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetYearValue()));
+    connect(m_box_month, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetMonthValue()));
+    connect(m_box_day, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetDayValue()));
+    connect(m_box_hour, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetHourValue()));
+    connect(m_box_minute, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(GetMinuteValue()));
 
     connect(cancel,SIGNAL(clicked()),this,SLOT(CloseSettingPage()));
     connect(ok,SIGNAL(clicked()),this,SLOT(CloseSettingOkPage()));
@@ -297,6 +345,26 @@ void CSettingPage::initQComboBox()
     {
         m_box_coldWaterSet->addItem(QWidget::tr(cureWaterValue[i]));
     }
+    for(i = 0;i < 13;i++)
+    {
+        m_box_year->addItem(QWidget::tr(aviableSelectRearValue[i]));
+    }
+    for(i = 0;i < 12;i++)
+    {
+        m_box_month->addItem(QWidget::tr(aviableSelectMonthValue[i]));
+    }
+    for(i = 0;i < 30;i++)
+    {
+        m_box_day->addItem(QWidget::tr(aviableSelectDayValue[i]));
+    }
+    for(i = 0;i < 24;i++)
+    {
+        m_box_hour->addItem(QWidget::tr(aviableSelectHourValue[i]));
+    }
+    for(i = 0;i < 60;i++)
+    {
+        m_box_minute->addItem(QWidget::tr(aviableSelectMinuteValue[i]));
+    }
 
 }
 
@@ -324,13 +392,157 @@ void CSettingPage::GetCurePosCurrentValue()
 {
     surrentstatusvalue.curePos = m_box_coldWaterSet->currentIndex();
 }
+
+/*获得当前治疗位置值*/
+void CSettingPage::GetYearValue()
+{
+    currentdatetime.year = m_box_year->currentIndex();
+}
+/*获得当前治疗位置值*/
+void CSettingPage::GetMonthValue()
+{
+    currentdatetime.month = m_box_month->currentIndex();
+    printf("%d\n",currentdatetime.month);
+}
+/*获得当前治疗位置值*/
+void CSettingPage::GetDayValue()
+{
+    currentdatetime.day = m_box_day->currentIndex();
+    printf("%d\n",currentdatetime.day);
+}
+/*获得当前治疗位置值*/
+void CSettingPage::GetHourValue()
+{
+    currentdatetime.hour = m_box_hour->currentIndex();
+    printf("%d\n",currentdatetime.hour);
+}
+/*获得当前治疗位置值*/
+void CSettingPage::GetMinuteValue()
+{
+    currentdatetime.minute = m_box_minute->currentIndex();
+    printf("%d\n",currentdatetime.minute);
+}
+
+
 void CSettingPage::CloseSettingPage()
 {
     g_isSetting = true;
     close();
 }
+
+//"2018-11-19 14:11:33";
 void CSettingPage::CloseSettingOkPage()
 {
+    char time_str[64]={0};
+    strcpy(time_str,aviableSelectRearValue[currentdatetime.year]);
+    strcat(time_str,"-");
+    strcat(time_str,aviableSelectMonthValue[currentdatetime.month]);
+    strcat(time_str,"-");
+    strcat(time_str,aviableSelectDayValue[currentdatetime.day]);
+    strcat(time_str,"  ");
+    strcat(time_str,aviableSelectHourValue[currentdatetime.hour]);
+    strcat(time_str,":");
+    strcat(time_str,aviableSelectMinuteValue[currentdatetime.minute]);
+    strcat(time_str,":");
+    strcat(time_str,aviableSelectSecondValue[currentdatetime.second]);
+
+
+    printf("%s\n",time_str);
+
+    SetSysDateAndTime(time_str);
+     SetHWClockFromSysClock(0);
+
+
     g_isSetting = true;
     close();
+}
+
+/*
+char * CSettingPage::transdatetimetostr()
+{
+     QString str = QString(aviableSelectRearValue[currentdatetime.year])+ QString("  ")+QString(aviableSelectMonthValue[currentdatetime.month])+\
+            + QString("  ")+QString(aviableSelectDayValue[currentdatetime.day])+ QString("  ")+QString(aviableSelectHourValue[currentdatetime.hour])+\
+             QString("  ")+QString(aviableSelectMinuteValue[currentdatetime.minute])+ QString("  ")+QString(aviableSelectSecondValue[currentdatetime.second]) ;
+    const datetime = str.toStdString().c_str();
+    return datetime;
+}
+*/
+int SetSysDateAndTime(const char *time_str)
+{
+    struct tm 			time_tm;
+    struct timeval 	time_tv;
+    time_t 					timep;
+        int 						ret;
+
+        if(time_str == NULL)
+        {
+                fprintf(stderr, "time string args invalid!\n");
+                return -1;
+        }
+
+    sscanf(time_str, "%d-%d-%d %d:%d:%d", &time_tm.tm_year, &time_tm.tm_mon, &time_tm.tm_mday, &time_tm.tm_hour, &time_tm.tm_min, &time_tm.tm_sec);
+    time_tm.tm_year 	-= 1900;
+    time_tm.tm_mon 		-= 1;
+    time_tm.tm_wday 	= 0;
+    time_tm.tm_yday 	= 0;
+    time_tm.tm_isdst	= 0;
+
+    timep = mktime(&time_tm);
+    time_tv.tv_sec  = timep;
+    time_tv.tv_usec = 0;
+
+    ret = settimeofday(&time_tv, NULL);
+    if(ret != 0)
+    {
+        fprintf(stderr, "settimeofday failed\n");
+        return -2;
+    }
+
+    return 0;
+}
+
+
+void SetHWClockFromSysClock(int utc)
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    //if (gettimeofday(&tv, NULL))
+    //	bb_perror_msg_and_die("gettimeofday() failed");
+    write_rtc(tv.tv_sec, utc);
+}
+
+
+
+static int  rtc_xopen(const char **default_rtc, int flags)
+{
+    int rtc;
+
+    if (!*default_rtc) {
+        *default_rtc = "/dev/rtc";
+        rtc = open(*default_rtc, flags);
+        if (rtc >= 0)
+            return rtc;
+        *default_rtc = "/dev/rtc0";
+        rtc = open(*default_rtc, flags);
+        if (rtc >= 0)
+            return rtc;
+        *default_rtc = "/dev/misc/rtc";
+    }
+
+    return open(*default_rtc, flags);
+}
+
+static void write_rtc(time_t t, int utc)
+{
+#define RTC_SET_TIME	_IOW('p', 0x0a, struct rtc_time) /* Set RTC time    */
+
+    struct tm tm;
+    int rtc = rtc_xopen(&rtcname, O_WRONLY);
+
+    tm = *(utc ? gmtime(&t) : localtime(&t));
+    tm.tm_isdst = 0;
+
+    ioctl(rtc, RTC_SET_TIME, &tm);
+    close(rtc);
 }
