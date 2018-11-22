@@ -45,16 +45,25 @@ bool g_isInsertingPipe = false;
 static char g_cWhichKey = 0;
 static int g_cWhichChannel;
 static bool g_bKeyValue = false;  //first press or second press  true:first press  false:second press
-static bool g_bRecordChannelStatus[8] = {false,false,false,false,false,false,false,false};
+static bool g_bRecordChannelStatus[8] = {true,true,true,true,true,true,true,true};
 volatile bool g_bIsFinishiIncreasePower = true;
 volatile bool g_bIsfinishReadtempture = true;
 static int g_iPipeStatus = -1;
 extern CCURRENTSTATUSVALUE surrentstatusvalue;
 extern bool g_isSetting;
+static int fd_tmp = -1;
+
+static volatile bool g_tmp=true,g_pin=true;
 
 volatile bool channel_mask[4]={false,false,false,false};
 
 pthread_mutex_t g_mutex;
+
+pthread_mutex_t g_mutex_status = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t g_mycond_status = PTHREAD_COND_INITIALIZER;
+
+pthread_mutex_t g_mutex_status1 = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t g_mycond_status1= PTHREAD_COND_INITIALIZER;
 
 QVector<double> temp(1200);  //zhengjian max
 QVector<double> temp1(1200);  //zhengjian min
@@ -640,147 +649,151 @@ bool cure_close()
 
 void *GetCurrTmp(__attribute__((unused))void *args)
 {
-        unsigned int i;
+        unsigned int i,j;
         unsigned short currTmp1[32]={0};
         unsigned short currTmp2[32]={0};
         float tmp1[8]={0},tmp2[8]={0};
         struct timeval start,end;
-        char temp = 0,pin_status = 1;
-        bool last=false,current=false,next=false;
-
-        int fd = open("/dev/mdmedical_tmp", O_RDWR);
-        if(fd < 0)
+        char temp = 0;
+        char pin_status = 1;
+        int count1=0;
+        int cycle_times = 0,channelcheckcount = 0;
+        bool tempchannelstatus[8][3] = {true};
+        fd_tmp = open("/dev/mdmedical_tmp", O_RDWR);
+        if(fd_tmp < 0)
         {
             printf("open device failed!\n");
         }
-
         usleep(2*1000);
         while(1)
         {
+                cycle_times++;
+
+#if 1
+                write(fd_tmp,&pin_status,1);
+                for(i=3;i<11;i++)
+                {
+                    g_cWhichChannel = i - 3;
+                    ioctl(fd_tmp,i,12);
+                    usleep(1200);
+                    read(fd_tmp,&g_iPipeStatus,4);
+                    if(g_iPipeStatus)
+                    {
+                        tempchannelstatus[g_cWhichChannel][channelcheckcount] = true;
+                        if(i==3)
+                        {
+                            //printf("ggggggggggggg %d %d  %d\n",count1+1,cycle_times,i);
+                            count1++;
+                        }
+                    }
+                    else
+                    {
+                        if(i==3)
+                        {
+                            //printf("sssssssssss %d %d  %d\n",count1,cycle_times,i);
+                        }
+                        tempchannelstatus[g_cWhichChannel][channelcheckcount] = false;
+                    }
+                }
+
+
+                usleep(10*1000);
+
+#endif
 
                     gettimeofday(&start,NULL);
-                    for(i=3;i<7;i++)
+                    write(fd_tmp,&temp,1);
+                    for(i=3;i<11;i++)
                     {
-                        //pthread_mutex_lock(&mutex);
-                        g_cWhichChannel = i - 3;
-                        //pthread_mutex_unlock(&mutex);
                         if(channel_mask[(i-3)/2])
                             continue;
-
-                        ioctl(fd,i,12);
-                        usleep(40);
-                        write(fd,&pin_status,1);
-                        read(fd,&g_iPipeStatus,4);
-                        if(g_iPipeStatus)
-                            last = true;
-                        else
-                            last = false;
-#if 0
-                        usleep(50);
-                        read(fd,&g_iPipeStatus,4);
-                        if(g_iPipeStatus)
-                            current = true;
-                        else
-                            current = false;
-                        usleep(50);
-                        read(fd,&g_iPipeStatus,4);
-                        if(g_iPipeStatus)
-                            next = true;
-                        else
-                            next = false;
-                        if(last&&current&&next)
-#endif
-                         if(last)
-                        {
-                            g_bRecordChannelStatus[g_cWhichChannel] = true;
-
-                        }
-                        else
-                        {
-                            g_bRecordChannelStatus[g_cWhichChannel] = false;
-                            //printf("kkkkkkkkkk %d\n",g_cWhichChannel+1);
-                        }
-
-                        write(fd,&temp,1);
-                        read(fd,currTmp1,32);
+                        ioctl(fd_tmp,i,12);
+                        read(fd_tmp,currTmp1,32);
                         tmp1[i-3] = fliter(currTmp1);
-
                     }
-                     //printf("\n"); printf("\n"); printf("\n");
                     gettimeofday(&end,NULL);
                     //printf("chazhi is %d\n",(end.tv_sec*1000000+end.tv_usec-start.tv_usec-start.tv_sec*1000000));
-                    if((end.tv_sec*1000000+end.tv_usec-start.tv_usec-start.tv_sec*1000000) >= 10000)
-                    {}
+                    if((end.tv_sec*1000000+end.tv_usec-start.tv_usec-start.tv_sec*1000000) >= 10000){}
                     else
                     {
                         usleep(10*1000-(end.tv_sec*1000000+end.tv_usec-start.tv_usec-start.tv_sec*1000000));
                     }
-                    //usleep(10*1000-(end.tv_sec*1000000+end.tv_usec-start.tv_usec-start.tv_sec*1000000));
-                   //printf("chazhi is %d\n",end.tv_usec-start.tv_usec);
+                    usleep(10*1000);
 
 #if 1
-                    for(i=3;i<7;i++)
+                    for(i=3;i<11;i++)
                     {
                         if(channel_mask[(i-3)/2])
                             continue;
-
-                        ioctl(fd,i,12);
-                        usleep(40);
-                        write(fd,&pin_status,1);
-                        read(fd,&g_iPipeStatus,4);
-                        if(g_iPipeStatus)
-                            last = true;
-                        else
-                            last = false;
-#if 0
-                        usleep(50);
-                        read(fd,&g_iPipeStatus,4);
-                        if(g_iPipeStatus)
-                            current = true;
-                        else
-                            current = false;
-                        usleep(50);
-                        read(fd,&g_iPipeStatus,4);
-                        if(g_iPipeStatus)
-                            next = true;
-                        else
-                            next = false;
-
-                        if(last&&current&&next)
- #endif
-                        if(last)
-                        {
-                            g_bRecordChannelStatus[g_cWhichChannel] = true;
-                        }
-                        else
-                        {
-                            g_bRecordChannelStatus[g_cWhichChannel] = false;
-                        }
-
-                        write(fd,&temp,1);
-                        read(fd,&currTmp2,32);
+                        ioctl(fd_tmp,i,12);
+                        read(fd_tmp,&currTmp2,32);
                         tmp2[i-3] = fliter(currTmp2);
-
-
-
-//                        for(k=0;k<16;k++)
-//                            printf(" %hu ",currTmp1[k]);
-//                            printf("\n");
-
                     }
-                    //printf("\n");printf("\n");printf("*********************************************************************88\n");
 #endif
 
                     g_bIsFinishiIncreasePower = true;
                     for(int j=0;j<8;j++)
                     {
                         g_fCurrTmp[j] = (tmp1[j] + tmp2[j])/2;
-                        //g_fCurrTmp[j] = tmp1[j];
-                        //if(g_fCurrTmp[j]>80)
-                          //printf(" channel  %d  %.1f\n",j+1,g_fCurrTmp[j]);
+
                     }
 
  /************************************以上读温度************************************************/
+#if 0
+                    usleep(10*1000);
+
+                    write(fd_tmp,&pin_status,1);
+                    for(i=3;i<11;i++)
+                    {
+                        g_cWhichChannel = i - 3;
+                        ioctl(fd_tmp,i,12);
+                        usleep(1200);
+                        read(fd_tmp,&g_iPipeStatus,4);
+                        if(g_iPipeStatus)
+                        {
+                            tempchannelstatus[g_cWhichChannel][channelcheckcount] = true;
+                            if(i==3)
+                            {
+                                printf("ggggggggggggg %d %d  %d\n",count1,cycle_times,i);
+                                count1++;
+                            }
+                        }
+                        else
+                        {
+                            if(i==3)
+                            {
+                                //printf("sssssssssss %d %d  %d\n",count1,cycle_times,i);
+                                count1++;
+                            }
+                            tempchannelstatus[g_cWhichChannel][channelcheckcount] = false;
+                        }
+                    }
+#endif
+ /************************************检测 通道************************************************/
+#if 1
+
+                        channelcheckcount++;
+                        if(channelcheckcount == 3)
+                        {
+                            for(i=0;i<8;i++)
+                            {
+                                    if(tempchannelstatus[i][0] && tempchannelstatus[i][1] &&tempchannelstatus[i][2])
+                                    {
+                                        g_bRecordChannelStatus[i] = true;
+                                        if(i == 0)
+                                        {
+                                            //printf("ffffffffffff\n");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        g_bRecordChannelStatus[i] = false;
+                                        //printf("ffffffffffff\n");
+                                    }
+                            }
+                            channelcheckcount=0;
+                        }
+#endif
                     usleep(300*1000);
  /************************************以下发送串口命令************************************************/
 #if 1
@@ -846,9 +859,85 @@ void *GetCurrTmp(__attribute__((unused))void *args)
                 #endif
                     }
 
-  #endif                      //usleep(400*1000);
+  #endif
+                    //usleep(400*1000);
         }
 }
+
+#if 0
+void *ReadPinStatus(__attribute__((unused))void *args)
+{
+    char pin_status = 1;
+    bool last=false,current=false,next=false;
+
+    for(;;)
+    {
+        if(fd_tmp < 0)
+        {
+            usleep(100*1000);
+            continue;
+        }
+        else
+        {
+            write(fd_tmp,&pin_status,1);
+            break;
+        }
+    }
+    while(1)
+    {
+
+        if(g_tmp)
+        {
+            usleep(10);
+            continue;
+        }
+            //printf("kkkkkkkkkkkkkkkkkkkkkkkk\n");
+            usleep(150);
+            read(fd_tmp,&g_iPipeStatus,4);
+            if(g_iPipeStatus)
+            {
+                last = true;
+            }
+            else
+            {
+                last = false;
+            }
+            usleep(150);
+            read(fd_tmp,&g_iPipeStatus,4);
+            if(g_iPipeStatus)
+            {
+                current = true;
+            }
+            else
+            {
+                current = false;
+            }
+            usleep(150);
+            read(fd_tmp,&g_iPipeStatus,4);
+            if(g_iPipeStatus)
+            {
+                next = true;
+            }
+            else
+            {
+                next = false;
+            }
+
+            if(last && current && next)
+            {
+                g_bRecordChannelStatus[g_cWhichChannel] = true;
+            }
+            else
+            {
+                g_bRecordChannelStatus[g_cWhichChannel] = false;
+            }
+
+            g_tmp = true;
+            g_pin = false;
+    }
+}
+#endif
+
 /*检测按键按下，/dev/mdmedical_buttons为按键的驱动程序的设备节点，驱动采用中断方式检测按键是否按下*/
 void *detect_key_func(__attribute__((unused))void *args)
 {
@@ -1675,6 +1764,18 @@ mdmedical::mdmedical(QWidget *parent) :
             printf("create GetCurrTmp pthread failed!\n");
         }
 #endif
+
+#if 0
+        pthread_t tid_rs;
+        int ret1;
+        ret1 = pthread_create(&tid_rs,NULL,ReadPinStatus,NULL);
+        if(ret != 0)
+        {
+            printf("create read channel status pthread failed!\n");
+        }
+
+#endif
+
 #if 0
         pthread_t sel_send_tid;
         int ret1;
@@ -1754,7 +1855,8 @@ void mdmedical::ShowTimeCurrent(void)
     strDate.append(strtime);
     ui->label_showcurtime->setText(strDate);
 
-    if(g_bRecordChannelStatus[1]||g_bRecordChannelStatus[3]||g_bRecordChannelStatus[5]||g_bRecordChannelStatus[7])
+    if(g_bRecordChannelStatus[0]&&g_bRecordChannelStatus[1]&&g_bRecordChannelStatus[2]&&g_bRecordChannelStatus[3]\
+            &&g_bRecordChannelStatus[4]&&g_bRecordChannelStatus[5]&&g_bRecordChannelStatus[6]&&g_bRecordChannelStatus[7])
     {
         if(black)
         {
