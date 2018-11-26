@@ -8,7 +8,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <QPushButton>
-#include <QWidget>
+#include <QDialog>
 #include <QLabel>
 #include <QRadioButton>
 #include <QDebug>
@@ -51,11 +51,11 @@ typedef struct CCurrentdatetime
 }CCURRENTDATETIME;
 
 
-class CSettingPage : public QWidget
+class CSettingPage : public QDialog
 {
     Q_OBJECT
 public:
-    explicit CSettingPage(QWidget *parent = 0);
+    explicit CSettingPage(QDialog *parent = 0);
     ~CSettingPage();
 
 

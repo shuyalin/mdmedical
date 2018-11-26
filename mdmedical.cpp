@@ -1,7 +1,7 @@
 #include "mdmedical.h"
 #include "ui_mdmedical.h"
 
-
+//v1.1/
 
 bool port[4] = {false,false,false,false};
 
@@ -3184,7 +3184,12 @@ void customMessageHandler(QtMsgType type, const QMessageLogContext &context, con
 void mdmedical::on_pushButton_setting_clicked()
 {
     m_pQTimerFlushShowInfo->start(1000);
-    mysetpage->showFullScreen();
+    //mysetpage->showFullScreen();
+    //mysetpage->show();
+    mysetpage->setWindowTitle("管理员模式");
+    mysetpage->setModal(true);
+    mysetpage->setWindowFlags(Qt::Window);
+    mysetpage->setGeometry(0,0,1024,768);
     mysetpage->show();
 }
 

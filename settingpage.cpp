@@ -59,8 +59,8 @@ void SetHWClockFromSysClock(int utc);
 static int  rtc_xopen(const char **default_rtc, int flags);
 static void write_rtc(time_t t, int utc);
 
-CSettingPage::CSettingPage(QWidget *parent) :
-    QWidget(parent)
+CSettingPage::CSettingPage(QDialog *parent) :
+    QDialog(parent)
 {
 
 #if 1
