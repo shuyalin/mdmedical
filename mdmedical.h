@@ -50,6 +50,8 @@
 
 #include "xlslib.h"
 
+#include "tcpsocket.h"
+
 using namespace xlslib_core;
 using namespace std;
 

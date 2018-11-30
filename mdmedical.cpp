@@ -18,6 +18,8 @@ CSerial sel2;
 CSerial sel4;
 CSerial sel5;
 
+
+
 QFile outFile("log.txt");
 
 bool g_bPrerareMode = false;
@@ -30,17 +32,13 @@ bool g_bCureClosed = false;
 bool g_bisBreakGas = false;
 bool g_bPrepareKey = false;
 bool g_bFootKey = false;
-bool g_bChargeGasKey = false;
-bool g_bBreakGasKey = false;
 bool g_bIsCreateAdcDetectpthread = true;
 bool g_bFootKeyHide = false;
 bool m_bIsfootkeyPress;
 bool g_bisupdatestatus = true;
-bool g_bisfinishedupdate = false;
 bool g_bupdatestatus = false;
 bool g_bisUpdatesuccess = false;
 bool g_bisGatheringAdcValue = false;
-bool g_isInsertingPipe = false;
 
 static char g_cWhichKey = 0;
 static int g_cWhichChannel;
@@ -59,11 +57,14 @@ volatile bool channel_mask[4]={false,false,false,false};
 
 pthread_mutex_t g_mutex;
 
+#if 0
 pthread_mutex_t g_mutex_status = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t g_mycond_status = PTHREAD_COND_INITIALIZER;
 
 pthread_mutex_t g_mutex_status1 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t g_mycond_status1= PTHREAD_COND_INITIALIZER;
+#endif
+
 
 QVector<double> temp(1200);  //zhengjian max
 QVector<double> temp1(1200);  //zhengjian min
@@ -1213,6 +1214,8 @@ mdmedical::mdmedical(QWidget *parent) :
 
         outFile.open(QIODevice::WriteOnly | QIODevice::Append);
 
+        CTcpSocket::getInstance()->InitTcpSocket();
+
         widget = new QCustomPlot(this);
         widget->setGeometry(10,380,600,300);
         widget->setVisible(0);
@@ -1804,6 +1807,9 @@ mdmedical::mdmedical(QWidget *parent) :
             return ;
         }
 #endif
+
+
+        CTcpSocket::getInstance()->SendInfo( "0000001", "start socket");
 }
 
 

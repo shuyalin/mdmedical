@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     qcustomplot.cpp \
     serial.cpp \
     cam.cpp \
-    settingpage.cpp
+    settingpage.cpp \
+    tcpsocket.cpp
 
 HEADERS  += mdmedical.h \
     qcustomplot.h \
@@ -27,7 +28,8 @@ HEADERS  += mdmedical.h \
     cam.h \
     managerdialog.h \
     settingpage.h \
-    systeminfo.h
+    systeminfo.h \
+    tcpsocket.h
 
 
 FORMS    += mdmedical.ui \
