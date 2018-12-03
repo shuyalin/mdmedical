@@ -39,6 +39,7 @@
 #include <string.h>
 #include <dirent.h>
 #include<time.h>
+#include <sys/signal.h>
 
 #include "qcustomplot.h"
 #include "serial.h"

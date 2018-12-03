@@ -100,6 +100,7 @@ CSettingPage::CSettingPage(QDialog *parent) :
     m_label_cureTempIcon->setPixmap(QPixmap(SETTINGPAGE"temp.png"));
     m_box_cureTempSet = new QComboBox(this);
     m_box_cureTempSet->setGeometry(290,40,100,30);
+    m_box_cureTempSet->setFocusPolicy(Qt::NoFocus);
     m_label_cureTempSet = new QLabel(this);
     m_label_cureTempSet->setWordWrap(true);
     m_label_cureTempSet->setGeometry(270,100,150,50);
@@ -130,6 +131,7 @@ CSettingPage::CSettingPage(QDialog *parent) :
     m_label_curePowerIcon->setPixmap(QPixmap(SETTINGPAGE"power.png"));
     m_box_curePowerSet = new QComboBox(this);
     m_box_curePowerSet->setGeometry(560,40,100,30);
+    m_box_curePowerSet->setFocusPolicy(Qt::NoFocus);
     m_label_curePowerSet = new QLabel(this);
     m_label_curePowerSet->setWordWrap(true);
     m_label_curePowerSet->setGeometry(520,100,150,50);
@@ -159,6 +161,7 @@ CSettingPage::CSettingPage(QDialog *parent) :
     //m_label_coldWaterIcon->setPixmap(QPixmap(SETTINGPAGE"water.png"));
     m_box_coldWaterSet = new QComboBox(this);
     m_box_coldWaterSet->setGeometry(810,40,100,30);
+    m_box_coldWaterSet->setFocusPolicy(Qt::NoFocus);
     m_label_coldWaterSet = new QLabel(this);
     m_label_coldWaterSet->setWordWrap(true);
     m_label_coldWaterSet->setGeometry(760,100,150,50);
@@ -201,74 +204,13 @@ CSettingPage::CSettingPage(QDialog *parent) :
     m_box_hour->setGeometry(550,400,100,40);
     m_box_minute->setGeometry(700,400,100,40);
 
+    m_box_year->setFocusPolicy(Qt::NoFocus);
+    m_box_month->setFocusPolicy(Qt::NoFocus);
+    m_box_day->setFocusPolicy(Qt::NoFocus);
+    m_box_hour->setFocusPolicy(Qt::NoFocus);
+    m_box_minute->setFocusPolicy(Qt::NoFocus);
+
      initQComboBox();
-
-#if 0
-    year = new QLabel(this);
-    year->setGeometry(320,400,80,30);
-    year->setText("year");
-    year_up = new QPushButton(this);
-    year_up->setGeometry(320,370,80,30);
-    year_up->setText("UP");
-    year_up->setIcon(QIcon(SETTINGPAGE"up.png"));
-    year_up->setIconSize(QSize(80,40));
-    year_down = new QPushButton(this);
-    year_down->setGeometry(320,430,80,30);
-    year_down->setText("DN");
-    year_down->setIcon(QIcon(SETTINGPAGE"down.png"));
-    year_down->setIconSize(QSize(80,40));
-
-    month = new QLabel(this);
-    month->setGeometry(420,400,80,30);
-    month->setText("month");
-    month_up = new QPushButton(this);
-    month_up->setGeometry(420,370,80,30);
-    month_up->setIcon(QIcon(SETTINGPAGE"up.png"));
-    month_up->setIconSize(QSize(80,40));
-    month_down = new QPushButton(this);
-    month_down->setGeometry(420,430,80,30);
-    month_down->setIcon(QIcon(SETTINGPAGE"down.png"));
-    month_down->setIconSize(QSize(80,40));
-
-    day = new QLabel(this);
-    day->setGeometry(520,400,80,30);
-    day->setText("day");
-    day_up = new QPushButton(this);
-    day_up->setGeometry(520,370,80,30);
-    day_up->setIcon(QIcon(SETTINGPAGE"up.png"));
-    day_up->setIconSize(QSize(80,40));
-    day_down = new QPushButton(this);
-    day_down->setGeometry(520,430,80,30);
-    day_down->setIcon(QIcon(SETTINGPAGE"down.png"));
-    day_down->setIconSize(QSize(80,40));
-
-
-    hour = new QLabel(this);
-    hour->setGeometry(620,400,80,30);
-    hour->setText("hour");
-    hour_up = new QPushButton(this);
-    hour_up->setGeometry(620,370,80,30);
-    hour_up->setIcon(QIcon(SETTINGPAGE"up.png"));
-    hour_up->setIconSize(QSize(80,40));
-    hour_down = new QPushButton(this);
-    hour_down->setGeometry(620,430,80,30);
-    hour_down->setIcon(QIcon(SETTINGPAGE"down.png"));
-    hour_down->setIconSize(QSize(80,40));
-
-
-    minute = new QLabel(this);
-    minute->setGeometry(720,400,80,30);
-    minute->setText("minute");
-    minute_up = new QPushButton(this);
-    minute_up->setGeometry(720,370,80,30);
-    minute_up->setIcon(QIcon(SETTINGPAGE"up.png"));
-    minute_up->setIconSize(QSize(80,40));
-    minute_down = new QPushButton(this);
-    minute_down->setGeometry(720,430,80,30);
-    minute_down->setIcon(QIcon(SETTINGPAGE"down.png"));
-    minute_down->setIconSize(QSize(80,40));
-
-#endif
 
 
 
@@ -373,54 +315,50 @@ void CSettingPage::initQComboBox()
 /*获得当前治疗周期时间*/
 void CSettingPage::GetCureCycleCurrentValue()
 {
-    surrentstatusvalue.cureCycle = m_box_curePeriodSet->currentIndex();
+    reocrdTempStatusValue.cureCycle = m_box_curePeriodSet->currentIndex();
 }
 /*获得当前目标温度*/
 void CSettingPage::GetTargetTmpCurrentValue()
 {
-    surrentstatusvalue.targetTmp = m_box_cureTempSet->currentIndex();
+    reocrdTempStatusValue.targetTmp = m_box_cureTempSet->currentIndex();
 }
 
 /*获得当前功率值*/
 void CSettingPage::GetMaxPowerCurrentValue()
 {
-    surrentstatusvalue.maxPower = m_box_curePowerSet->currentIndex();
+    reocrdTempStatusValue.maxPower = m_box_curePowerSet->currentIndex();
 }
 
 /*获得当前治疗位置值*/
 void CSettingPage::GetCurePosCurrentValue()
 {
-    surrentstatusvalue.curePos = m_box_coldWaterSet->currentIndex();
+    reocrdTempStatusValue.curePos = m_box_coldWaterSet->currentIndex();
 }
 
 /*获得当前治疗位置值*/
 void CSettingPage::GetYearValue()
 {
-    currentdatetime.year = m_box_year->currentIndex();
+    recordTempDateValue.year = m_box_year->currentIndex();
 }
 /*获得当前治疗位置值*/
 void CSettingPage::GetMonthValue()
 {
-    currentdatetime.month = m_box_month->currentIndex();
-    printf("%d\n",currentdatetime.month);
+    recordTempDateValue.month = m_box_month->currentIndex();
 }
 /*获得当前治疗位置值*/
 void CSettingPage::GetDayValue()
 {
-    currentdatetime.day = m_box_day->currentIndex();
-    printf("%d\n",currentdatetime.day);
+    recordTempDateValue.day = m_box_day->currentIndex();
 }
 /*获得当前治疗位置值*/
 void CSettingPage::GetHourValue()
 {
-    currentdatetime.hour = m_box_hour->currentIndex();
-    printf("%d\n",currentdatetime.hour);
+    recordTempDateValue.hour = m_box_hour->currentIndex();
 }
 /*获得当前治疗位置值*/
 void CSettingPage::GetMinuteValue()
 {
-    currentdatetime.minute = m_box_minute->currentIndex();
-    printf("%d\n",currentdatetime.minute);
+    recordTempDateValue.minute = m_box_minute->currentIndex();
 }
 
 
@@ -434,6 +372,18 @@ void CSettingPage::CloseSettingPage()
 void CSettingPage::CloseSettingOkPage()
 {
     char time_str[64]={0};
+
+    surrentstatusvalue.cureCycle = reocrdTempStatusValue.cureCycle;
+    surrentstatusvalue.targetTmp = reocrdTempStatusValue.targetTmp;
+    surrentstatusvalue.maxPower = reocrdTempStatusValue.maxPower;
+    surrentstatusvalue.curePos = reocrdTempStatusValue.curePos;
+
+    currentdatetime.year = recordTempDateValue.year;
+    currentdatetime.month = recordTempDateValue.month;
+    currentdatetime.day = recordTempDateValue.day;
+    currentdatetime.hour = recordTempDateValue.hour;
+    currentdatetime.minute = recordTempDateValue.minute;
+
     strcpy(time_str,aviableSelectRearValue[currentdatetime.year]);
     strcat(time_str,"-");
     strcat(time_str,aviableSelectMonthValue[currentdatetime.month]);
@@ -445,9 +395,6 @@ void CSettingPage::CloseSettingOkPage()
     strcat(time_str,aviableSelectMinuteValue[currentdatetime.minute]);
     strcat(time_str,":");
     strcat(time_str,aviableSelectSecondValue[currentdatetime.second]);
-
-
-    printf("%s\n",time_str);
 
     SetSysDateAndTime(time_str);
      SetHWClockFromSysClock(0);

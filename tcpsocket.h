@@ -16,8 +16,8 @@ public:
     ~CTcpSocket();
 
     static CTcpSocket *getInstance();
-    int InitTcpSocket();
-    int SendInfo(const  char *devid,const  char *printinfo);
+    void InitTcpSocket();
+    void SendInfo(const  char *devid,const  char *printinfo);
 private:
     static CTcpSocket *tcpsockrt;
     int fd_socket;

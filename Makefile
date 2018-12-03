@@ -993,6 +993,7 @@ moc_mdmedical.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-
 		../xlslib_arm/xlslib/tmp/include/xlslib/summinfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/docsumminfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/formula_expr.h \
+		tcpsocket.h \
 		mdmedical.h \
 		moc_predefs.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/moc
@@ -2194,7 +2195,8 @@ main.o: main.cpp mdmedical.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/workbook.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/summinfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/docsumminfo.h \
-		../xlslib_arm/xlslib/tmp/include/xlslib/formula_expr.h
+		../xlslib_arm/xlslib/tmp/include/xlslib/formula_expr.h \
+		tcpsocket.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 mdmedical.o: mdmedical.cpp mdmedical.h \
@@ -2736,6 +2738,7 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/summinfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/docsumminfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/formula_expr.h \
+		tcpsocket.h \
 		ui_mdmedical.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mdmedical.o mdmedical.cpp
 
