@@ -53,7 +53,8 @@ SOURCES       = main.cpp \
 		qcustomplot.cpp \
 		serial.cpp \
 		cam.cpp \
-		settingpage.cpp moc_mdmedical.cpp \
+		settingpage.cpp \
+		tcpsocket.cpp moc_mdmedical.cpp \
 		moc_qcustomplot.cpp \
 		moc_settingpage.cpp
 OBJECTS       = main.o \
@@ -62,6 +63,7 @@ OBJECTS       = main.o \
 		serial.o \
 		cam.o \
 		settingpage.o \
+		tcpsocket.o \
 		moc_mdmedical.o \
 		moc_qcustomplot.o \
 		moc_settingpage.o
@@ -171,12 +173,14 @@ DIST          = ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs
 		cam.h \
 		managerdialog.h \
 		settingpage.h \
-		systeminfo.h main.cpp \
+		systeminfo.h \
+		tcpsocket.h main.cpp \
 		mdmedical.cpp \
 		qcustomplot.cpp \
 		serial.cpp \
 		cam.cpp \
-		settingpage.cpp
+		settingpage.cpp \
+		tcpsocket.cpp
 QMAKE_TARGET  = mdmedical
 DESTDIR       = 
 TARGET        = mdmedical
@@ -414,8 +418,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents mdmedical.h qcustomplot.h serial.h cam.h managerdialog.h settingpage.h systeminfo.h $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp mdmedical.cpp qcustomplot.cpp serial.cpp cam.cpp settingpage.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents mdmedical.h qcustomplot.h serial.h cam.h managerdialog.h settingpage.h systeminfo.h tcpsocket.h $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp mdmedical.cpp qcustomplot.cpp serial.cpp cam.cpp settingpage.cpp tcpsocket.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents mdmedical.ui managerdialog.ui systeminfo.ui $(DISTDIR)/
 
 
@@ -989,6 +993,7 @@ moc_mdmedical.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-
 		../xlslib_arm/xlslib/tmp/include/xlslib/summinfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/docsumminfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/formula_expr.h \
+		tcpsocket.h \
 		mdmedical.h \
 		moc_predefs.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/bin/moc
@@ -1584,7 +1589,8 @@ moc_settingpage.cpp: ../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/ar
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qfiledevice.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvector2d.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtouchdevice.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QWidget \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QDialog \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qdialog.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlabel.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
@@ -2189,7 +2195,8 @@ main.o: main.cpp mdmedical.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/workbook.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/summinfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/docsumminfo.h \
-		../xlslib_arm/xlslib/tmp/include/xlslib/formula_expr.h
+		../xlslib_arm/xlslib/tmp/include/xlslib/formula_expr.h \
+		tcpsocket.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 mdmedical.o: mdmedical.cpp mdmedical.h \
@@ -2731,6 +2738,7 @@ mdmedical.o: mdmedical.cpp mdmedical.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/summinfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/docsumminfo.h \
 		../xlslib_arm/xlslib/tmp/include/xlslib/formula_expr.h \
+		tcpsocket.h \
 		ui_mdmedical.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mdmedical.o mdmedical.cpp
 
@@ -3379,7 +3387,8 @@ settingpage.o: settingpage.cpp settingpage.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qfiledevice.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qvector2d.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtGui/qtouchdevice.h \
-		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QWidget \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QDialog \
+		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qdialog.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/QLabel \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qlabel.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtWidgets/qframe.h \
@@ -3415,6 +3424,9 @@ settingpage.o: settingpage.cpp settingpage.h \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/QProcess \
 		../cqr40_linuxqt_bv3/buildroot-2017.02.3/output/host/usr/arm-buildroot-linux-gnueabihf/sysroot/usr/include/qt5/QtCore/qprocess.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o settingpage.o settingpage.cpp
+
+tcpsocket.o: tcpsocket.cpp tcpsocket.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o tcpsocket.o tcpsocket.cpp
 
 moc_mdmedical.o: moc_mdmedical.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mdmedical.o moc_mdmedical.cpp

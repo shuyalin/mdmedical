@@ -18,6 +18,8 @@ CSerial sel2;
 CSerial sel4;
 CSerial sel5;
 
+
+
 QFile outFile("log.txt");
 
 bool g_bPrerareMode = false;
@@ -30,17 +32,13 @@ bool g_bCureClosed = false;
 bool g_bisBreakGas = false;
 bool g_bPrepareKey = false;
 bool g_bFootKey = false;
-bool g_bChargeGasKey = false;
-bool g_bBreakGasKey = false;
 bool g_bIsCreateAdcDetectpthread = true;
 bool g_bFootKeyHide = false;
 bool m_bIsfootkeyPress;
 bool g_bisupdatestatus = true;
-bool g_bisfinishedupdate = false;
 bool g_bupdatestatus = false;
 bool g_bisUpdatesuccess = false;
 bool g_bisGatheringAdcValue = false;
-bool g_isInsertingPipe = false;
 
 static char g_cWhichKey = 0;
 static int g_cWhichChannel;
@@ -59,11 +57,14 @@ volatile bool channel_mask[4]={false,false,false,false};
 
 pthread_mutex_t g_mutex;
 
+#if 0
 pthread_mutex_t g_mutex_status = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t g_mycond_status = PTHREAD_COND_INITIALIZER;
 
 pthread_mutex_t g_mutex_status1 = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t g_mycond_status1= PTHREAD_COND_INITIALIZER;
+#endif
+
 
 QVector<double> temp(1200);  //zhengjian max
 QVector<double> temp1(1200);  //zhengjian min
@@ -649,7 +650,7 @@ bool cure_close()
 
 void *GetCurrTmp(__attribute__((unused))void *args)
 {
-        unsigned int i,j;
+        unsigned int i;
         unsigned short currTmp1[32]={0};
         unsigned short currTmp2[32]={0};
         float tmp1[8]={0},tmp2[8]={0};
@@ -1010,13 +1011,13 @@ void *deteAdcValve(__attribute__((unused))void *args)
         printf("open /dev/mdmedical_adc failed!\n");
     }
         int  AdValue=0;
-        char val = 2, flag1 = 1,flag2 = 1,flag3 = 1,Air_pressure = 0;
+        char val = 2, flag1 = 1,flag2 = 1,flag3 = 1/*,Air_pressure = 0*/;
         while(g_bisGatheringAdcValue)
         {
           read(fd,&AdValue,4);
           //printf("fffffffff %d\n",AdValue);
           usleep(200*1000);
-          Air_pressure = (char)((0.032 * AdValue - 0.1)/0.04);
+          //Air_pressure = (char)((0.032 * AdValue - 0.1)/0.04);
            if(AdValue > 40 && flag1 == 1)
            {
                flag1 = 0;
@@ -1213,6 +1214,8 @@ mdmedical::mdmedical(QWidget *parent) :
 
         outFile.open(QIODevice::WriteOnly | QIODevice::Append);
 
+        CTcpSocket::getInstance()->InitTcpSocket();
+
         widget = new QCustomPlot(this);
         widget->setGeometry(10,380,600,300);
         widget->setVisible(0);
@@ -1335,6 +1338,7 @@ mdmedical::mdmedical(QWidget *parent) :
           m_QPushButton_nextstep = new QPushButton(promitwidget);
           m_QPushButton_nextstep->setGeometry(800,40,60,30);
           m_QPushButton_nextstep->setText(QString::fromUtf8("下一步"));
+          m_QPushButton_nextstep->setFocusPolicy(Qt::NoFocus);
 
 
          connect(m_QPushButton_nextstep,SIGNAL(clicked()),this,SLOT(NextStep()));
@@ -1389,8 +1393,8 @@ mdmedical::mdmedical(QWidget *parent) :
         ui->label_tmp4->setGeometry(400,250,65,20);
 
         ui->label_tmp5->setGeometry(260,467,65,20);
-        ui->label_tmp6->setGeometry(260,400,65,20);(280,467,65,20);//400,267,65,20
-        ui->label_tmp7->setGeometry(130,250,65,20);//280,400,65,20
+        ui->label_tmp6->setGeometry(260,400,65,20);
+        ui->label_tmp7->setGeometry(130,250,65,20);
         ui->label_tmp8->setGeometry(130,305,65,20);
 
 
@@ -1536,6 +1540,10 @@ mdmedical::mdmedical(QWidget *parent) :
         pushButton_td2->setText("2");
         pushButton_td3->setText("3");
         pushButton_td4->setText("4");
+        pushButton_td1->setFocusPolicy(Qt::NoFocus);
+        pushButton_td2->setFocusPolicy(Qt::NoFocus);
+        pushButton_td3->setFocusPolicy(Qt::NoFocus);
+        pushButton_td4->setFocusPolicy(Qt::NoFocus);
 
         groupBox_channelselect->setStyleSheet(
                         "QGroupBox"
@@ -1712,10 +1720,11 @@ mdmedical::mdmedical(QWidget *parent) :
 
         ui->pushButton_setting->setGeometry(10,20,80,40);
         ui->pushButton_setting->setText(QString::fromUtf8("系统设置"));
+        ui->pushButton_setting->setFocusPolicy(Qt::NoFocus);
 
         ui->pushButton_systeminfo->setGeometry(10,90,80,40);
         ui->pushButton_systeminfo->setText(QString::fromUtf8("系统信息"));
-
+        ui->pushButton_systeminfo->setFocusPolicy(Qt::NoFocus);
 
         InitMapValue();
          pthread_mutex_init(&g_mutex,NULL);
@@ -1804,6 +1813,9 @@ mdmedical::mdmedical(QWidget *parent) :
             return ;
         }
 #endif
+
+        signal(SIGPIPE,SIG_IGN);
+        CTcpSocket::getInstance()->SendInfo( "0000001", "start socket");
 }
 
 
@@ -1854,6 +1866,7 @@ void mdmedical::ShowTimeCurrent(void)
     strDate.append(" ");
     strDate.append(strtime);
     ui->label_showcurtime->setText(strDate);
+
 
     if(g_bRecordChannelStatus[0]&&g_bRecordChannelStatus[1]&&g_bRecordChannelStatus[2]&&g_bRecordChannelStatus[3]\
             &&g_bRecordChannelStatus[4]&&g_bRecordChannelStatus[5]&&g_bRecordChannelStatus[6]&&g_bRecordChannelStatus[7])
@@ -2686,7 +2699,7 @@ void mdmedical::CopyUserData()
         char *tmp_pos = NULL;
         char dest_dir[48] = "/udisk/";
         char src_dir[48] = "/home/scandata/";
-        char *basePath = "/home/scandata";
+        const char *basePath = "/home/scandata";
 
         if ((dir=opendir(basePath)) == NULL)
         {

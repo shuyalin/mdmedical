@@ -34,7 +34,7 @@
 typedef struct CCurrentstatusvalue
 {
      int cureCycle = 0;
-     int targetTmp  = 50;
+     int targetTmp  = 0;
      int maxPower  = 0;
      int curePos  = 0;
 }CCURRENTSTATUSVALUE;
@@ -144,7 +144,8 @@ private:
     QPushButton   *cancel;
 
 
-
+    CCURRENTSTATUSVALUE reocrdTempStatusValue;
+    CCURRENTDATETIME recordTempDateValue;
 
 
 #endif
